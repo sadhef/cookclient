@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { FaClock, FaStar, FaHeart, FaRegHeart, FaMicrophone, FaMicrophoneSlash, FaUtensils, FaExclamationTriangle } from 'react-icons/fa';
+import { FaClock, FaStar, FaHeart, FaRegHeart, FaMicrophone, FaMicrophoneSlash, FaUtensils } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { getRecipe, addToFavorites, removeFromFavorites } from '../services/recipeService';
@@ -27,8 +27,7 @@ const RecipeDetailsPage = () => {
     isListening,
     voiceResponse,
     currentStep,
-    toggleVoiceControl,
-    browserSupported
+    toggleVoiceControl
   } = useVoiceControl(recipe);
 
   // Fetch recipe and reviews
@@ -256,29 +255,22 @@ const RecipeDetailsPage = () => {
             )}
             
             {/* Voice Control Button */}
-            {browserSupported ? (
-              <button 
-                onClick={toggleVoiceControl}
-                className="flex items-center gap-2 bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full transition-colors ml-auto"
-              >
-                {isListening ? (
-                  <>
-                    <FaMicrophoneSlash />
-                    <span>{t('voice_control_stop')}</span>
-                  </>
-                ) : (
-                  <>
-                    <FaMicrophone />
-                    <span>{t('voice_control_start')}</span>
-                  </>
-                )}
-              </button>
-            ) : (
-              <div className="flex items-center gap-2 bg-yellow-500/30 px-3 py-1 rounded-full ml-auto">
-                <FaExclamationTriangle />
-                <span className="text-sm">{t('voice_control_not_supported')}</span>
-              </div>
-            )}
+            <button 
+              onClick={toggleVoiceControl}
+              className="flex items-center gap-2 bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full transition-colors ml-auto"
+            >
+              {isListening ? (
+                <>
+                  <FaMicrophoneSlash />
+                  <span>{t('voice_control_stop')}</span>
+                </>
+              ) : (
+                <>
+                  <FaMicrophone />
+                  <span>{t('voice_control_start')}</span>
+                </>
+              )}
+            </button>
           </div>
           
           {/* Voice Response */}
@@ -405,28 +397,28 @@ const RecipeDetailsPage = () => {
                   <div className="bg-gray-50 p-4 rounded-lg text-center">
                     <p className="text-gray-500 text-sm">{t('calories')}</p>
                     <p className="text-2xl font-bold text-primary">
-                      {Math.round(nutrition.calories?.value || 0)}
+                      {Math.round(nutrition.calories.value)}
                       <span className="text-sm font-normal ml-1">kcal</span>
                     </p>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg text-center">
                     <p className="text-gray-500 text-sm">{t('protein')}</p>
                     <p className="text-2xl font-bold text-primary">
-                      {Math.round(nutrition.protein?.value || 0)}
+                      {Math.round(nutrition.protein.value)}
                       <span className="text-sm font-normal ml-1">g</span>
                     </p>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg text-center">
                     <p className="text-gray-500 text-sm">{t('carbs')}</p>
                     <p className="text-2xl font-bold text-primary">
-                      {Math.round(nutrition.carbs?.value || 0)}
+                      {Math.round(nutrition.carbs.value)}
                       <span className="text-sm font-normal ml-1">g</span>
                     </p>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg text-center">
                     <p className="text-gray-500 text-sm">{t('fats')}</p>
                     <p className="text-2xl font-bold text-primary">
-                      {Math.round(nutrition.fats?.value || 0)}
+                      {Math.round(nutrition.fats.value)}
                       <span className="text-sm font-normal ml-1">g</span>
                     </p>
                   </div>
