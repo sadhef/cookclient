@@ -1,11 +1,24 @@
 import axios from 'axios';
 
-// Get API URL from environment variables
-const API_URL = process.env.REACT_APP_API_URL || 'https://cookify-backend.vercel.app/api';
+// Determine API URL based on environment
+const getApiUrl = () => {
+  // Check if we're in development mode
+  const isDev = process.env.NODE_ENV === 'development';
+  
+  // Check for explicit API URL from environment
+  if (process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL;
+  }
+  
+  // Default to localhost for development, production URL otherwise
+  return isDev 
+    ? 'http://localhost:5000/api'
+    : 'https://cookify-backend.vercel.app/api';
+};
 
 // Create axios instance with baseURL
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: getApiUrl(),
   headers: {
     'Content-Type': 'application/json'
   },
@@ -55,6 +68,11 @@ api.interceptors.response.use(
           }
         });
       }
+    }
+    
+    // Check if it's a network error (likely server not running)
+    if (error.message === 'Network Error') {
+      console.error('Server connection failed. Is the backend server running?');
     }
     
     // Handle 404 errors
