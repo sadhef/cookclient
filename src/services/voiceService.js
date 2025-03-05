@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { useLanguage } from '../context/LanguageContext';
 
 // Language codes for speech recognition
@@ -36,29 +37,12 @@ const commandPatterns = {
   }
 };
 
-// Initialize a SpeechRecognition instance
-const initializeSpeechRecognition = () => {
-  if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
-    console.warn('Speech Recognition API is not supported in this browser');
-    return null;
-  }
-  
-  // Use standard or webkit prefix
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  return new SpeechRecognition();
-};
-
 // Text-to-speech function
 const speak = (text, language = 'en') => {
   if ('speechSynthesis' in window) {
-    // Cancel any ongoing speech
-    window.speechSynthesis.cancel();
-    
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = languageCodes[language] || 'en-US';
-    window.speechSynthesis.speak(utterance);
-  } else {
-    console.warn('Speech Synthesis API is not supported in this browser');
+    speechSynthesis.speak(utterance);
   }
 };
 
@@ -68,53 +52,8 @@ export const useVoiceControl = (recipeData) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isListening, setIsListening] = useState(false);
   const [voiceResponse, setVoiceResponse] = useState('');
-  const [transcript, setTranscript] = useState('');
-  const [recognition, setRecognition] = useState(null);
   
-  // Initialize speech recognition on component mount
-  useEffect(() => {
-    const recognitionInstance = initializeSpeechRecognition();
-    if (recognitionInstance) {
-      recognitionInstance.continuous = false;
-      recognitionInstance.interimResults = false;
-      
-      recognitionInstance.onresult = (event) => {
-        const current = event.resultIndex;
-        const newTranscript = event.results[current][0].transcript;
-        setTranscript(newTranscript);
-      };
-      
-      recognitionInstance.onerror = (event) => {
-        console.error('Speech Recognition Error:', event.error);
-        if (event.error === 'not-allowed') {
-          setVoiceResponse(t('microphone_permission_denied'));
-        } else {
-          setVoiceResponse(t('error_occurred'));
-        }
-        setIsListening(false);
-      };
-      
-      recognitionInstance.onend = () => {
-        // Don't set isListening to false here to prevent issues with manual stopping
-      };
-      
-      setRecognition(recognitionInstance);
-    }
-    
-    // Cleanup on unmount
-    return () => {
-      if (recognitionInstance) {
-        recognitionInstance.abort();
-      }
-    };
-  }, [t]);
-  
-  // Update language whenever currentLanguage changes
-  useEffect(() => {
-    if (recognition) {
-      recognition.lang = languageCodes[currentLanguage] || 'en-US';
-    }
-  }, [currentLanguage, recognition]);
+  const { transcript, resetTranscript, listening } = useSpeechRecognition();
   
   // Define command patterns based on current language
   const patterns = commandPatterns[currentLanguage] || commandPatterns.en;
@@ -204,41 +143,33 @@ export const useVoiceControl = (recipeData) => {
   useEffect(() => {
     if (transcript && isListening) {
       processCommand(transcript);
-      setTranscript('');
+      resetTranscript();
     }
-  }, [transcript, isListening, processCommand]);
+  }, [transcript, isListening, processCommand, resetTranscript]);
+  
+  // Effect to sync listening state with SpeechRecognition
+  useEffect(() => {
+    setIsListening(listening);
+  }, [listening]);
   
   // Start voice control
   const startVoiceControl = useCallback(() => {
-    if (!recognition) {
-      setVoiceResponse(t('browser_not_supported'));
-      return;
-    }
-    
     if (!isListening) {
-      try {
-        recognition.start();
-        setIsListening(true);
-        setVoiceResponse(t('listening'));
-      } catch (error) {
-        console.error('Error starting speech recognition:', error);
-        setVoiceResponse(t('error_starting_recognition'));
-      }
+      SpeechRecognition.startListening({ 
+        continuous: false,
+        language: languageCodes[currentLanguage] || 'en-US'
+      });
+      setVoiceResponse(t('listening'));
     }
-  }, [isListening, recognition, t]);
+  }, [isListening, currentLanguage, t]);
   
   // Stop voice control
   const stopVoiceControl = useCallback(() => {
-    if (recognition && isListening) {
-      try {
-        recognition.stop();
-        setIsListening(false);
-        setVoiceResponse('');
-      } catch (error) {
-        console.error('Error stopping speech recognition:', error);
-      }
+    if (isListening) {
+      SpeechRecognition.stopListening();
+      setVoiceResponse('');
     }
-  }, [isListening, recognition]);
+  }, [isListening]);
   
   // Toggle voice control
   const toggleVoiceControl = useCallback(() => {
@@ -256,7 +187,6 @@ export const useVoiceControl = (recipeData) => {
     startVoiceControl,
     stopVoiceControl,
     toggleVoiceControl,
-    speak: (text) => speak(text, currentLanguage),
-    browserSupported: !!recognition
+    speak: (text) => speak(text, currentLanguage)
   };
 };
