@@ -39,7 +39,7 @@ export const getChatbotResponse = async (message, history = []) => {
     
     throw new Error(
       error.response?.data?.error || 
-      'Failed to communicate with Rifi. Please try again later.'
+      'Failed to communicate with Cookie 🎀. Please try again later.'
     );
   }
 };
@@ -86,7 +86,7 @@ export const getMockResponse = (message) => {
   const msgLower = message.toLowerCase();
   
   if (msgLower.includes('hello') || msgLower.includes('hi')) {
-    return "Hello! I'm Rifi, your recipe assistant. How can I help you today?";
+    return "Hello! I'm Cookie 🎀, your recipe assistant. How can I help you today?";
   }
   
   if (msgLower.includes('recipe') || msgLower.includes('cook')) {

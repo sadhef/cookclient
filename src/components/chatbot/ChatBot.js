@@ -84,7 +84,7 @@ const ChatBot = () => {
                 <FaPaperPlane className="text-primary" />
               </div>
               <div>
-                <h3 className="font-bold">Rifi</h3>
+                <h3 className="font-bold"> Cookie 🎀</h3>
                 <p className="text-xs opacity-80">{t('chatbot_subtitle')}</p>
               </div>
             </div>

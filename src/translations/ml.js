@@ -130,7 +130,7 @@ const malayalamTranslations = {
   'chatbot_error': 'ക്ഷമിക്കണം, എനിക്ക് നിങ്ങളുടെ അഭ്യർത്ഥന പ്രോസസ്സ് ചെയ്യാൻ കഴിഞ്ഞില്ല. വീണ്ടും ശ്രമിക്കുക.',
   'chatbot_suggestion_error': 'ക്ഷമിക്കണം, ഇപ്പോൾ പാചക നിർദ്ദേശങ്ങൾ ജനറേറ്റ് ചെയ്യാൻ കഴിഞ്ഞില്ല. പിന്നീട് വീണ്ടും ശ്രമിക്കുക.',
   'chatbot_ingredients_prompt': 'എന്റെ പക്കൽ ഇവയുണ്ട്',
-  'ask_rifi': 'നിർദ്ദേശങ്ങൾക്ക് റിഫിയോട് ചോദിക്കൂ'
+  'ask_Cookie': 'നിർദ്ദേശങ്ങൾക്ക് റിഫിയോട് ചോദിക്കൂ'
 };
 
 export default malayalamTranslations;

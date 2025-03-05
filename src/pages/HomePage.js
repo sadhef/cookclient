@@ -212,8 +212,8 @@ const HomePage = () => {
     }
   };
   
-  // Handle asking Rifi for suggestions
-  const handleAskRifi = () => {
+  // Handle asking Cookie 🎀 for suggestions
+  const handleAskCookie  = () => {
     if (!ingredients.trim()) {
       toast.info(t('enter_ingredients'));
       return;
@@ -263,11 +263,11 @@ const HomePage = () => {
                   </button>
                   <button
                     type="button"
-                    onClick={handleAskRifi}
+                    onClick={handleAskCookie}
                     className="py-3 px-4 bg-white/80 backdrop-blur-sm text-primary-dark font-medium rounded-lg hover:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary flex items-center"
                   >
                     <FaRobot className="mr-2" />
-                    {t('ask_rifi')}
+                    {t('ask_Cookie')}
                   </button>
                 </div>
               </div>

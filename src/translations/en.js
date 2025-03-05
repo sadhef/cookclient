@@ -121,16 +121,16 @@ const englishTranslations = {
   '500_message': 'Something went wrong on our server.',
   
   // Chatbot translations
-  'open_chatbot': 'Open chat with Rifi',
+  'open_chatbot': 'Open chat with Cookie 🎀',
   'close_chatbot': 'Close chat',
   'clear_chat': 'Clear chat history',
-  'chatbot_welcome': 'Hi there! I\'m Rifi, your personal recipe assistant. You can ask me about recipes, cooking techniques, or ingredient substitutions. How can I help you today?',
+  'chatbot_welcome': 'Hi there! I\'m Cookie 🎀, your personal recipe assistant. You can ask me about recipes, cooking techniques, or ingredient substitutions. How can I help you today?',
   'chatbot_subtitle': 'Your recipe assistant',
-  'chatbot_input_placeholder': 'Ask Rifi a question...',
+  'chatbot_input_placeholder': 'Ask Cookie 🎀 a question...',
   'chatbot_error': 'Sorry, I couldn\'t process your request. Please try again.',
   'chatbot_suggestion_error': 'Sorry, I couldn\'t generate recipe suggestions right now. Please try again later.',
   'chatbot_ingredients_prompt': 'I have these ingredients',
-  'ask_rifi': 'Ask Rifi for suggestions'
+  'ask_Cookie': 'Ask Cookie 🎀 for suggestions'
 };
 
 export default englishTranslations;

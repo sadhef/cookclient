@@ -30,7 +30,7 @@ const ChatTyping = () => {
               />
             ))}
           </div>
-          <span className="ml-2 text-gray-500 text-sm">Rifi is typing...</span>
+          <span className="ml-2 text-gray-500 text-sm">Cookie 🎀 is typing...</span>
         </div>
       </div>
     </div>
