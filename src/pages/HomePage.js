@@ -213,7 +213,7 @@ const HomePage = () => {
   };
   
   // Handle asking Cookie 🎀 for suggestions
-  const handleAskCookie  = () => {
+  const handleAskCookie = () => {
     if (!ingredients.trim()) {
       toast.info(t('enter_ingredients'));
       return;
@@ -228,9 +228,28 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-primary to-primary-dark text-white py-16">
-        <div className="container mx-auto px-4 relative z-10">
+      {/* Hero Section with Video Background */}
+      <div className="relative text-white overflow-hidden">
+        {/* Video Background */}
+        <div className="absolute inset-0 w-full h-full z-0">
+          <video 
+            autoPlay 
+            loop 
+            muted 
+            playsInline
+            className="w-full h-full object-cover"
+            style={{ filter: 'brightness(0.7)' }}
+          >
+            <source src="/IMG_9234.MOV" type="video/mp4" />
+            {/* Fallback background if video fails to load */}
+            <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary-dark"></div>
+          </video>
+          {/* Overlay to ensure text readability */}
+          <div className="absolute inset-0 bg-black opacity-50"></div>
+        </div>
+
+        {/* Content */}
+        <div className="container mx-auto px-4 relative z-10 py-20">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
               {t('app_name')}
