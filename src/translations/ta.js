@@ -1,0 +1,136 @@
+const tamilTranslations = {
+  // Common
+  'app_name': 'COokiFy',
+  'loading': 'ஏற்றுகிறது...',
+  'error_occurred': 'பிழை ஏற்பட்டது',
+  'try_again': 'மீண்டும் முயற்சிக்கவும்',
+  'save': 'சேமி',
+  'cancel': 'ரத்து செய்',
+  'delete': 'நீக்கு',
+  'edit': 'திருத்து',
+  'submit': 'சமர்ப்பி',
+  'search': 'தேடு',
+  'no_results': 'முடிவுகள் எதுவும் கிடைக்கவில்லை',
+  
+  // Navigation
+  'home': 'முகப்பு',
+  'recipes': 'சமையல் குறிப்புகள்',
+  'profile': 'சுயவிவரம்',
+  'login': 'உள்நுழைக',
+  'register': 'பதிவு செய்க',
+  'logout': 'வெளியேறு',
+  'favorites': 'பிடித்தவை',
+  'my_reviews': 'எனது மதிப்புரைகள்',
+  'admin_dashboard': 'நிர்வாக டாஷ்போர்டு',
+  
+  // Homepage
+  'welcome_text': 'உங்கள் பொருட்களை பயன்படுத்தி சுவையான சமையல் குறிப்புகளைக் கண்டறியுங்கள்',
+  'ingredients_placeholder': 'பொருட்களை உள்ளிடவும் (காற்புள்ளியால் பிரிக்கப்பட்டது)',
+  'find_recipes': 'சமையல் குறிப்புகளைக் கண்டறிக',
+  'multilingual': 'பல மொழி ஆதரவு',
+  'voice_control': 'குரல் கட்டுப்பாடு',
+  'nutrition_calc': 'ஊட்டச்சத்து கணிப்பான்',
+  'recommended_recipes': 'பரிந்துரைக்கப்பட்ட சமையல் குறிப்புகள்',
+  'top_rated_recipes': 'உயர் மதிப்பிடப்பட்ட சமையல் குறிப்புகள்',
+  'latest_recipes': 'சமீபத்திய சமையல் குறிப்புகள்',
+  
+  // Recipe Details
+  'ingredients': 'பொருட்கள்',
+  'instructions': 'வழிமுறைகள்',
+  'nutritional_information': 'ஊட்டச்சத்து தகவல்',
+  'calories': 'கலோரிகள்',
+  'protein': 'புரதம்',
+  'carbs': 'கார்போஹைட்ரேட்',
+  'fats': 'கொழுப்புகள்',
+  'fiber': 'நார்ச்சத்து',
+  'reviews': 'மதிப்புரைகள்',
+  'add_review': 'மதிப்புரை சேர்க்க',
+  'average_rating': 'சராசரி மதிப்பீடு',
+  'preparation_time': 'தயாரிப்பு நேரம்',
+  'cooking_time': 'சமைக்கும் நேரம்',
+  'total_time': 'மொத்த நேரம்',
+  'servings': 'பரிமாறல்கள்',
+  'add_to_favorites': 'பிடித்தவற்றில் சேர்',
+  'remove_from_favorites': 'பிடித்தவற்றிலிருந்து நீக்கு',
+  'start_cooking': 'சமைக்கத் தொடங்கு',
+  
+  // Reviews
+  'leave_review': 'மதிப்புரை விடுங்கள்',
+  'your_rating': 'உங்கள் மதிப்பீடு',
+  'your_comment': 'உங்கள் கருத்து',
+  'edit_review': 'மதிப்புரையைத் திருத்து',
+  'delete_review': 'மதிப்புரையை நீக்கு',
+  'delete_review_confirm': 'உங்கள் மதிப்புரையை நீக்க விரும்புகிறீர்களா?',
+  'no_reviews': 'இதுவரை மதிப்புரைகள் எதுவும் இல்லை. முதல் மதிப்புரையை விடுங்கள்!',
+  
+  // Voice Control
+  'voice_control_start': 'குரல் கட்டுப்பாட்டைத் தொடங்கு',
+  'voice_control_stop': 'குரல் கட்டுப்பாட்டை நிறுத்து',
+  'listening': 'கேட்கிறது...',
+  'voice_commands': 'குரல் கட்டளைகள்',
+  'command_not_recognized': 'கட்டளை அங்கீகரிக்கப்படவில்லை',
+  
+  // Authentication
+  'email': 'மின்னஞ்சல்',
+  'password': 'கடவுச்சொல்',
+  'confirm_password': 'கடவுச்சொல்லை உறுதிப்படுத்தவும்',
+  'name': 'பெயர்',
+  'login_success': 'வெற்றிகரமாக உள்நுழைந்தீர்கள்',
+  'register_success': 'வெற்றிகரமாக பதிவு செய்யப்பட்டது',
+  'password_mismatch': 'கடவுச்சொற்கள் பொருந்தவில்லை',
+  'forgot_password': 'கடவுச்சொல் மறந்துவிட்டதா?',
+  'already_have_account': 'ஏற்கனவே கணக்கு உள்ளதா?',
+  'dont_have_account': 'கணக்கு இல்லையா?',
+  'login_required': 'தொடர உள்நுழையவும்',
+  
+  // Profile
+  'update_profile': 'சுயவிவரத்தைப் புதுப்பிக்கவும்',
+  'change_password': 'கடவுச்சொல்லை மாற்று',
+  'current_password': 'தற்போதைய கடவுச்சொல்',
+  'new_password': 'புதிய கடவுச்சொல்',
+  'profile_updated': 'சுயவிவரம் வெற்றிகரமாக புதுப்பிக்கப்பட்டது',
+  'password_updated': 'கடவுச்சொல் வெற்றிகரமாக புதுப்பிக்கப்பட்டது',
+  'personal_information': 'தனிப்பட்ட தகவல்',
+  'account_settings': 'கணக்கு அமைப்புகள்',
+  'preferred_language': 'விருப்பமான மொழி',
+  
+  // Admin
+  'dashboard': 'டாஷ்போர்டு',
+  'manage_users': 'பயனர்களை நிர்வகிக்கவும்',
+  'manage_recipes': 'சமையல் குறிப்புகளை நிர்வகிக்கவும்',
+  'manage_reviews': 'மதிப்புரைகளை நிர்வகிக்கவும்',
+  'total_users': 'மொத்த பயனர்கள்',
+  'total_recipes': 'மொத்த சமையல் குறிப்புகள்',
+  'total_reviews': 'மொத்த மதிப்புரைகள்',
+  'recent_users': 'சமீபத்திய பயனர்கள்',
+  'recent_recipes': 'சமீபத்திய சமையல் குறிப்புகள்',
+  'recent_reviews': 'சமீபத்திய மதிப்புரைகள்',
+  'create_user': 'பயனரை உருவாக்கு',
+  'edit_user': 'பயனரைத் திருத்து',
+  'delete_user': 'பயனரை நீக்கு',
+  'delete_user_confirm': 'இந்த பயனரை நீக்க விரும்புகிறீர்களா?',
+  'role': 'பங்கு',
+  'admin': 'நிர்வாகி',
+  'user': 'பயனர்',
+  
+  // Error Pages
+  '404_title': 'பக்கம் கிடைக்கவில்லை',
+  '404_message': 'நீங்கள் தேடும் பக்கம் இல்லை.',
+  'go_home': 'முகப்பு பக்கத்திற்குச் செல்க',
+  '500_title': 'சேவையக பிழை',
+  '500_message': 'எங்கள் சேவையகத்தில் ஏதோ தவறு நடந்துள்ளது.',
+  
+  // Chatbot translations
+  'open_chatbot': 'ரிஃபியுடன் அரட்டையைத் திற',
+  'close_chatbot': 'அரட்டையை மூடு',
+  'clear_chat': 'அரட்டை வரலாற்றை அழி',
+  'chatbot_welcome': 'வணக்கம்! நான் ரிஃபி, உங்கள் தனிப்பட்ட சமையல் உதவியாளர். சமையல் குறிப்புகள், சமையல் நுட்பங்கள் அல்லது பொருட்கள் மாற்றீடுகள் பற்றி நீங்கள் என்னிடம் கேட்கலாம். நான் எப்படி உதவ முடியும்?',
+  'chatbot_subtitle': 'உங்கள் சமையல் உதவியாளர்',
+  'chatbot_input_placeholder': 'ரிஃபியிடம் ஒரு கேள்வி கேளுங்கள்...',
+  'chatbot_error': 'மன்னிக்கவும், உங்கள் கோரிக்கையை நான் செயலாக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',
+  'chatbot_suggestion_error': 'மன்னிக்கவும், தற்போது சமையல் பரிந்துரைகளை உருவாக்க முடியவில்லை. பின்னர் மீண்டும் முயற்சிக்கவும்.',
+  'chatbot_ingredients_prompt': 'என்னிடம் இந்த பொருட்கள் உள்ளன',
+  'ask_rifi': 'பரிந்துரைகளுக்கு ரிஃபியிடம் கேளுங்கள்'
+};
+
+export default tamilTranslations;

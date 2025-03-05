@@ -1,0 +1,136 @@
+const englishTranslations = {
+  // Common
+  'app_name': 'COokiFy',
+  'loading': 'Loading...',
+  'error_occurred': 'An error occurred',
+  'try_again': 'Please try again',
+  'save': 'Save',
+  'cancel': 'Cancel',
+  'delete': 'Delete',
+  'edit': 'Edit',
+  'submit': 'Submit',
+  'search': 'Search',
+  'no_results': 'No results found',
+  
+  // Navigation
+  'home': 'Home',
+  'recipes': 'Recipes',
+  'profile': 'Profile',
+  'login': 'Login',
+  'register': 'Register',
+  'logout': 'Logout',
+  'favorites': 'Favorites',
+  'my_reviews': 'My Reviews',
+  'admin_dashboard': 'Admin Dashboard',
+  
+  // Homepage
+  'welcome_text': 'Find delicious recipes based on your ingredients',
+  'ingredients_placeholder': 'Enter ingredients (comma separated)',
+  'find_recipes': 'Find Recipes',
+  'multilingual': 'Multilingual Support',
+  'voice_control': 'Voice Control',
+  'nutrition_calc': 'Nutrition Calculator',
+  'recommended_recipes': 'Recommended Recipes',
+  'top_rated_recipes': 'Top Rated Recipes',
+  'latest_recipes': 'Latest Recipes',
+  
+  // Recipe Details
+  'ingredients': 'Ingredients',
+  'instructions': 'Instructions',
+  'nutritional_information': 'Nutritional Information',
+  'calories': 'Calories',
+  'protein': 'Protein',
+  'carbs': 'Carbs',
+  'fats': 'Fats',
+  'fiber': 'Fiber',
+  'reviews': 'Reviews',
+  'add_review': 'Add Review',
+  'average_rating': 'Average Rating',
+  'preparation_time': 'Preparation Time',
+  'cooking_time': 'Cooking Time',
+  'total_time': 'Total Time',
+  'servings': 'Servings',
+  'add_to_favorites': 'Add to Favorites',
+  'remove_from_favorites': 'Remove from Favorites',
+  'start_cooking': 'Start Cooking',
+  
+  // Reviews
+  'leave_review': 'Leave a Review',
+  'your_rating': 'Your Rating',
+  'your_comment': 'Your Comment',
+  'edit_review': 'Edit Review',
+  'delete_review': 'Delete Review',
+  'delete_review_confirm': 'Are you sure you want to delete your review?',
+  'no_reviews': 'No reviews yet. Be the first to review!',
+  
+  // Voice Control
+  'voice_control_start': 'Start Voice Control',
+  'voice_control_stop': 'Stop Voice Control',
+  'listening': 'Listening...',
+  'voice_commands': 'Voice Commands',
+  'command_not_recognized': 'Command not recognized',
+  
+  // Authentication
+  'email': 'Email',
+  'password': 'Password',
+  'confirm_password': 'Confirm Password',
+  'name': 'Name',
+  'login_success': 'Login successful',
+  'register_success': 'Registration successful',
+  'password_mismatch': 'Passwords do not match',
+  'forgot_password': 'Forgot Password?',
+  'already_have_account': 'Already have an account?',
+  'dont_have_account': 'Don\'t have an account?',
+  'login_required': 'Please login to continue',
+  
+  // Profile
+  'update_profile': 'Update Profile',
+  'change_password': 'Change Password',
+  'current_password': 'Current Password',
+  'new_password': 'New Password',
+  'profile_updated': 'Profile updated successfully',
+  'password_updated': 'Password updated successfully',
+  'personal_information': 'Personal Information',
+  'account_settings': 'Account Settings',
+  'preferred_language': 'Preferred Language',
+  
+  // Admin
+  'dashboard': 'Dashboard',
+  'manage_users': 'Manage Users',
+  'manage_recipes': 'Manage Recipes',
+  'manage_reviews': 'Manage Reviews',
+  'total_users': 'Total Users',
+  'total_recipes': 'Total Recipes',
+  'total_reviews': 'Total Reviews',
+  'recent_users': 'Recent Users',
+  'recent_recipes': 'Recent Recipes',
+  'recent_reviews': 'Recent Reviews',
+  'create_user': 'Create User',
+  'edit_user': 'Edit User',
+  'delete_user': 'Delete User',
+  'delete_user_confirm': 'Are you sure you want to delete this user?',
+  'role': 'Role',
+  'admin': 'Admin',
+  'user': 'User',
+  
+  // Error Pages
+  '404_title': 'Page Not Found',
+  '404_message': 'The page you are looking for does not exist.',
+  'go_home': 'Go to Homepage',
+  '500_title': 'Server Error',
+  '500_message': 'Something went wrong on our server.',
+  
+  // Chatbot translations
+  'open_chatbot': 'Open chat with Rifi',
+  'close_chatbot': 'Close chat',
+  'clear_chat': 'Clear chat history',
+  'chatbot_welcome': 'Hi there! I\'m Rifi, your personal recipe assistant. You can ask me about recipes, cooking techniques, or ingredient substitutions. How can I help you today?',
+  'chatbot_subtitle': 'Your recipe assistant',
+  'chatbot_input_placeholder': 'Ask Rifi a question...',
+  'chatbot_error': 'Sorry, I couldn\'t process your request. Please try again.',
+  'chatbot_suggestion_error': 'Sorry, I couldn\'t generate recipe suggestions right now. Please try again later.',
+  'chatbot_ingredients_prompt': 'I have these ingredients',
+  'ask_rifi': 'Ask Rifi for suggestions'
+};
+
+export default englishTranslations;

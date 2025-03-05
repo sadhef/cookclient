@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ff4d4d" />
+    <meta name="description" content="COokiFy - Find recipes based on ingredients" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <title>COokiFy</title>
+    <!-- Suppress WebSocket errors -->
+    <script>
+      (function() {
+        const originalConsoleError = console.error;
+        console.error = function() {
+          // Filter out WebSocket errors
+          if (
+            arguments[0] && 
+            typeof arguments[0] === 'string' && 
+            (arguments[0].includes('WebSocket connection') || 
+             arguments[0].includes('Invalid frame header'))
+          ) {
+            return;
+          }
+          return originalConsoleError.apply(console, arguments);
+        };
+      })();
+    </script>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
+</html>

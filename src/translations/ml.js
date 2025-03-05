@@ -1,0 +1,136 @@
+const malayalamTranslations = {
+  // Common
+  'app_name': 'COokiFy',
+  'loading': 'ലോഡ് ചെയ്യുന്നു...',
+  'error_occurred': 'ഒരു പിശക് സംഭവിച്ചു',
+  'try_again': 'വീണ്ടും ശ്രമിക്കുക',
+  'save': 'സംരക്ഷിക്കുക',
+  'cancel': 'റദ്ദാക്കുക',
+  'delete': 'ഇല്ലാതാക്കുക',
+  'edit': 'എഡിറ്റ് ചെയ്യുക',
+  'submit': 'സമർപ്പിക്കുക',
+  'search': 'തിരയുക',
+  'no_results': 'ഫലങ്ങളൊന്നും കണ്ടെത്തിയില്ല',
+  
+  // Navigation
+  'home': 'ഹോം',
+  'recipes': 'പാചകക്കുറിപ്പുകൾ',
+  'profile': 'പ്രൊഫൈൽ',
+  'login': 'ലോഗിൻ',
+  'register': 'രജിസ്റ്റർ',
+  'logout': 'ലോഗ്ഔട്ട്',
+  'favorites': 'പ്രിയപ്പെട്ടവ',
+  'my_reviews': 'എന്റെ അവലോകനങ്ങൾ',
+  'admin_dashboard': 'അഡ്മിൻ ഡാഷ്ബോർഡ്',
+  
+  // Homepage
+  'welcome_text': 'നിങ്ങളുടെ ചേരുവകൾ അടിസ്ഥാനമാക്കി രുചികരമായ പാചകക്കുറിപ്പുകൾ കണ്ടെത്തുക',
+  'ingredients_placeholder': 'ചേരുവകൾ നൽകുക (കോമയാൽ വേർതിരിച്ചത്)',
+  'find_recipes': 'പാചകക്കുറിപ്പുകൾ കണ്ടെത്തുക',
+  'multilingual': 'ബഹുഭാഷാ പിന്തുണ',
+  'voice_control': 'വോയ്സ് കൺട്രോൾ',
+  'nutrition_calc': 'പോഷകാംശ കാൽക്കുലേറ്റർ',
+  'recommended_recipes': 'ശുപാർശ ചെയ്ത പാചകക്കുറിപ്പുകൾ',
+  'top_rated_recipes': 'ഉയർന്ന റേറ്റിങ്ങ് ലഭിച്ച പാചകക്കുറിപ്പുകൾ',
+  'latest_recipes': 'പുതിയ പാചകക്കുറിപ്പുകൾ',
+  
+  // Recipe Details
+  'ingredients': 'ചേരുവകൾ',
+  'instructions': 'നിർദ്ദേശങ്ങൾ',
+  'nutritional_information': 'പോഷകവിവരങ്ങൾ',
+  'calories': 'കലോറികൾ',
+  'protein': 'പ്രോട്ടീൻ',
+  'carbs': 'കാർബോഹൈഡ്രേറ്റുകൾ',
+  'fats': 'കൊഴുപ്പുകൾ',
+  'fiber': 'നാരുകൾ',
+  'reviews': 'അവലോകനങ്ങൾ',
+  'add_review': 'അവലോകനം ചേർക്കുക',
+  'average_rating': 'ശരാശരി റേറ്റിംഗ്',
+  'preparation_time': 'തയ്യാറാക്കൽ സമയം',
+  'cooking_time': 'പാചകം ചെയ്യുന്ന സമയം',
+  'total_time': 'ആകെ സമയം',
+  'servings': 'സേവനങ്ങൾ',
+  'add_to_favorites': 'പ്രിയപ്പെട്ടവയിലേക്ക് ചേർക്കുക',
+  'remove_from_favorites': 'പ്രിയപ്പെട്ടവയിൽ നിന്ന് നീക്കം ചെയ്യുക',
+  'start_cooking': 'പാചകം തുടങ്ങുക',
+  
+  // Reviews
+  'leave_review': 'അവലോകനം നൽകുക',
+  'your_rating': 'നിങ്ങളുടെ റേറ്റിംഗ്',
+  'your_comment': 'നിങ്ങളുടെ അഭിപ്രായം',
+  'edit_review': 'അവലോകനം എഡിറ്റ് ചെയ്യുക',
+  'delete_review': 'അവലോകനം ഇല്ലാതാക്കുക',
+  'delete_review_confirm': 'നിങ്ങളുടെ അവലോകനം ഇല്ലാതാക്കാൻ തീർച്ചയാണോ?',
+  'no_reviews': 'ഇതുവരെ അവലോകനങ്ങളൊന്നുമില്ല. ആദ്യത്തെ അവലോകനം നൽകുക!',
+  
+  // Voice Control
+  'voice_control_start': 'വോയ്സ് കൺട്രോൾ ആരംഭിക്കുക',
+  'voice_control_stop': 'വോയ്സ് കൺട്രോൾ നിർത്തുക',
+  'listening': 'കേൾക്കുന്നു...',
+  'voice_commands': 'വോയ്സ് കമാൻഡുകൾ',
+  'command_not_recognized': 'കമാൻഡ് തിരിച്ചറിഞ്ഞില്ല',
+  
+  // Authentication
+  'email': 'ഇമെയിൽ',
+  'password': 'പാസ്‌വേഡ്',
+  'confirm_password': 'പാസ്‌വേഡ് സ്ഥിരീകരിക്കുക',
+  'name': 'പേര്',
+  'login_success': 'വിജയകരമായി ലോഗിൻ ചെയ്തു',
+  'register_success': 'വിജയകരമായി രജിസ്റ്റർ ചെയ്തു',
+  'password_mismatch': 'പാസ്‌വേഡുകൾ പൊരുത്തപ്പെടുന്നില്ല',
+  'forgot_password': 'പാസ്‌വേഡ് മറന്നോ?',
+  'already_have_account': 'ഇതിനകം ഒരു അക്കൗണ്ട് ഉണ്ടോ?',
+  'dont_have_account': 'അക്കൗണ്ട് ഇല്ലേ?',
+  'login_required': 'തുടരാൻ ദയവായി ലോഗിൻ ചെയ്യുക',
+  
+  // Profile
+  'update_profile': 'പ്രൊഫൈൽ അപ്ഡേറ്റ് ചെയ്യുക',
+  'change_password': 'പാസ്‌വേഡ് മാറ്റുക',
+  'current_password': 'നിലവിലെ പാസ്‌വേഡ്',
+  'new_password': 'പുതിയ പാസ്‌വേഡ്',
+  'profile_updated': 'പ്രൊഫൈൽ വിജയകരമായി അപ്ഡേറ്റ് ചെയ്തു',
+  'password_updated': 'പാസ്‌വേഡ് വിജയകരമായി അപ്ഡേറ്റ് ചെയ്തു',
+  'personal_information': 'വ്യക്തിഗത വിവരങ്ങൾ',
+  'account_settings': 'അക്കൗണ്ട് സെറ്റിംഗുകൾ',
+  'preferred_language': 'പ്രിയപ്പെട്ട ഭാഷ',
+  
+  // Admin
+  'dashboard': 'ഡാഷ്ബോർഡ്',
+  'manage_users': 'ഉപയോക്താക്കളെ നിയന്ത്രിക്കുക',
+  'manage_recipes': 'പാചകക്കുറിപ്പുകൾ നിയന്ത്രിക്കുക',
+  'manage_reviews': 'അവലോകനങ്ങൾ നിയന്ത്രിക്കുക',
+  'total_users': 'ആകെ ഉപയോക്താക്കൾ',
+  'total_recipes': 'ആകെ പാചകക്കുറിപ്പുകൾ',
+  'total_reviews': 'ആകെ അവലോകനങ്ങൾ',
+  'recent_users': 'പുതിയ ഉപയോക്താക്കൾ',
+  'recent_recipes': 'പുതിയ പാചകക്കുറിപ്പുകൾ',
+  'recent_reviews': 'പുതിയ അവലോകനങ്ങൾ',
+  'create_user': 'ഉപയോക്താവിനെ സൃഷ്ടിക്കുക',
+  'edit_user': 'ഉപയോക്താവിനെ എഡിറ്റ് ചെയ്യുക',
+  'delete_user': 'ഉപയോക്താവിനെ ഇല്ലാതാക്കുക',
+  'delete_user_confirm': 'ഈ ഉപയോക്താവിനെ ഇല്ലാതാക്കാൻ തീർച്ചയാണോ?',
+  'role': 'റോൾ',
+  'admin': 'അഡ്മിൻ',
+  'user': 'ഉപയോക്താവ്',
+  
+  // Error Pages
+  '404_title': 'പേജ് കണ്ടെത്തിയില്ല',
+  '404_message': 'നിങ്ങൾ തിരയുന്ന പേജ് നിലവിലില്ല.',
+  'go_home': 'ഹോം പേജിലേക്ക് പോകുക',
+  '500_title': 'സെർവർ പിശക്',
+  '500_message': 'ഞങ്ങളുടെ സെർവറിൽ എന്തോ തെറ്റ് സംഭവിച്ചു.',
+  
+  // Chatbot translations
+  'open_chatbot': 'റിഫിയുമായി ചാറ്റ് തുറക്കുക',
+  'close_chatbot': 'ചാറ്റ് അടയ്ക്കുക',
+  'clear_chat': 'ചാറ്റ് ചരിത്രം മായ്ക്കുക',
+  'chatbot_welcome': 'നമസ്കാരം! ഞാനാണ് റിഫി, നിങ്ങളുടെ വ്യക്തിഗത പാചക സഹായി. പാചകക്കുറിപ്പുകൾ, പാചക സാങ്കേതികവിദ്യകൾ, അല്ലെങ്കിൽ ചേരുവകളുടെ മാറ്റങ്ങൾ എന്നിവയെക്കുറിച്ച് നിങ്ങൾക്ക് എന്നോട് ചോദിക്കാം. ഞാൻ എങ്ങനെ സഹായിക്കണം?',
+  'chatbot_subtitle': 'നിങ്ങളുടെ പാചക സഹായി',
+  'chatbot_input_placeholder': 'റിഫിയോട് ഒരു ചോദ്യം ചോദിക്കൂ...',
+  'chatbot_error': 'ക്ഷമിക്കണം, എനിക്ക് നിങ്ങളുടെ അഭ്യർത്ഥന പ്രോസസ്സ് ചെയ്യാൻ കഴിഞ്ഞില്ല. വീണ്ടും ശ്രമിക്കുക.',
+  'chatbot_suggestion_error': 'ക്ഷമിക്കണം, ഇപ്പോൾ പാചക നിർദ്ദേശങ്ങൾ ജനറേറ്റ് ചെയ്യാൻ കഴിഞ്ഞില്ല. പിന്നീട് വീണ്ടും ശ്രമിക്കുക.',
+  'chatbot_ingredients_prompt': 'എന്റെ പക്കൽ ഇവയുണ്ട്',
+  'ask_rifi': 'നിർദ്ദേശങ്ങൾക്ക് റിഫിയോട് ചോദിക്കൂ'
+};
+
+export default malayalamTranslations;
