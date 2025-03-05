@@ -69,6 +69,18 @@ const tamilTranslations = {
   'listening': 'கேட்கிறது...',
   'voice_commands': 'குரல் கட்டளைகள்',
   'command_not_recognized': 'கட்டளை அங்கீகரிக்கப்படவில்லை',
+  'browser_not_supported': 'இந்த உலாவியில் குரல் கட்டுப்பாடு ஆதரிக்கப்படவில்லை',
+  'microphone_permission_denied': 'மைக்ரோஃபோன் அனுமதி மறுக்கப்பட்டது. மைக்ரோஃபோன் அணுகலை அனுமதிக்கவும்.',
+  'error_occurred': 'பிழை ஏற்பட்டது',
+  'error_starting_recognition': 'குரல் அங்கீகாரத்தைத் தொடங்குவதில் பிழை',
+  'voice_control_not_supported': 'குரல் கட்டுப்பாடு ஆதரிக்கப்படவில்லை',
+  
+  // Recipe instructions voice commands
+  'no_ingredients': 'பொருட்கள் எதுவும் இல்லை',
+  'no_instructions': 'வழிமுறைகள் எதுவும் இல்லை',
+  'no_nutrition_info': 'ஊட்டச்சத்து தகவல் எதுவும் இல்லை',
+  'recipe_complete': 'சமையல் குறிப்பு முடிந்தது. மேலும் படிகள் இல்லை.',
+  'first_step': 'இது முதல் படி.',
   
   // Authentication
   'email': 'மின்னஞ்சல்',

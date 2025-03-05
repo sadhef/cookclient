@@ -64,11 +64,23 @@ const malayalamTranslations = {
   'no_reviews': 'ഇതുവരെ അവലോകനങ്ങളൊന്നുമില്ല. ആദ്യത്തെ അവലോകനം നൽകുക!',
   
   // Voice Control
-  'voice_control_start': 'വോയ്സ് കൺട്രോൾ ആരംഭിക്കുക',
-  'voice_control_stop': 'വോയ്സ് കൺട്രോൾ നിർത്തുക',
+  'voice_control_start': 'വോയ്‌സ് കൺട്രോൾ ആരംഭിക്കുക',
+  'voice_control_stop': 'വോയ്‌സ് കൺട്രോൾ നിർത്തുക',
   'listening': 'കേൾക്കുന്നു...',
-  'voice_commands': 'വോയ്സ് കമാൻഡുകൾ',
+  'voice_commands': 'വോയ്‌സ് കമാൻഡുകൾ',
   'command_not_recognized': 'കമാൻഡ് തിരിച്ചറിഞ്ഞില്ല',
+  'browser_not_supported': 'ഈ ബ്രൗസറിൽ വോയ്‌സ് കൺട്രോൾ പിന്തുണയ്‌ക്കുന്നില്ല',
+  'microphone_permission_denied': 'മൈക്രോഫോൺ അനുമതി നിഷേധിച്ചു. ദയവായി മൈക്രോഫോൺ ആക്‌സസ് അനുവദിക്കുക.',
+  'error_occurred': 'ഒരു പിശക് സംഭവിച്ചു',
+  'error_starting_recognition': 'വോയ്‌സ് റെക്കഗ്നിഷൻ ആരംഭിക്കുന്നതിൽ പിശക്',
+  'voice_control_not_supported': 'വോയ്‌സ് കൺട്രോൾ പിന്തുണയ്‌ക്കുന്നില്ല',
+  
+  // Recipe instructions voice commands
+  'no_ingredients': 'ചേരുവകളൊന്നും ലഭ്യമല്ല',
+  'no_instructions': 'നിർദ്ദേശങ്ങളൊന്നും ലഭ്യമല്ല',
+  'no_nutrition_info': 'പോഷകവിവരങ്ങളൊന്നും ലഭ്യമല്ല',
+  'recipe_complete': 'റെസിപ്പി പൂർത്തിയായി. കൂടുതൽ ഘട്ടങ്ങളൊന്നുമില്ല.',
+  'first_step': 'ഇതാണ് ആദ്യ ഘട്ടം.',
   
   // Authentication
   'email': 'ഇമെയിൽ',
