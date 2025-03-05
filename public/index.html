@@ -5,51 +5,31 @@
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#ff4d4d" />
-    <meta
-      name="description"
-      content="COokiFy - Find recipes based on ingredients you have"
-    />
+    <meta name="description" content="COokiFy - Find recipes based on ingredients" />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    
-    <!-- Add meta tag for permissions policy -->
-    <meta http-equiv="Permissions-Policy" content="microphone=(), camera=()">
-    
-    <!-- Preconnect to Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <title>COokiFy - Recipe App</title>
+    <title>COokiFy</title>
+    <!-- Suppress WebSocket errors -->
+    <script>
+      (function() {
+        const originalConsoleError = console.error;
+        console.error = function() {
+          // Filter out WebSocket errors
+          if (
+            arguments[0] && 
+            typeof arguments[0] === 'string' && 
+            (arguments[0].includes('WebSocket connection') || 
+             arguments[0].includes('Invalid frame header'))
+          ) {
+            return;
+          }
+          return originalConsoleError.apply(console, arguments);
+        };
+      })();
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-    
-    <!-- Add polyfill for SpeechRecognition -->
-    <script>
-      // Check if SpeechRecognition is available in the browser
-      if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
-        console.warn('SpeechRecognition API is not supported in this browser');
-      }
-      
-      // Make sure browser allows access to microphone if available
-      if (navigator.permissions && navigator.permissions.query) {
-        try {
-          navigator.permissions.query({ name: 'microphone' })
-            .then(function(permissionStatus) {
-              console.log('Microphone permission state:', permissionStatus.state);
-              permissionStatus.onchange = function() {
-                console.log('Microphone permission state changed to:', this.state);
-              };
-            })
-            .catch(function(error) {
-              console.warn('Error checking microphone permission:', error);
-            });
-        } catch (e) {
-          console.warn('Cannot query microphone permission:', e);
-        }
-      }
-    </script>
   </body>
 </html>

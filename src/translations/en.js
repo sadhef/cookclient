@@ -69,18 +69,6 @@ const englishTranslations = {
   'listening': 'Listening...',
   'voice_commands': 'Voice Commands',
   'command_not_recognized': 'Command not recognized',
-  'browser_not_supported': 'Voice control is not supported in this browser',
-  'microphone_permission_denied': 'Microphone permission denied. Please allow microphone access.',
-  'error_occurred': 'An error occurred',
-  'error_starting_recognition': 'Error starting voice recognition',
-  'voice_control_not_supported': 'Voice control not supported',
-  
-  // Recipe instructions voice commands
-  'no_ingredients': 'No ingredients available',
-  'no_instructions': 'No instructions available',
-  'no_nutrition_info': 'No nutritional information available',
-  'recipe_complete': 'Recipe complete. No more steps.',
-  'first_step': 'This is the first step.',
   
   // Authentication
   'email': 'Email',
