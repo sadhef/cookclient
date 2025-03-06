@@ -23,7 +23,7 @@ const HomePage = () => {
       try {
         setLoading(true);
         
-        // Fetch top rated recipes
+        // Fetch top rated recipes with timeout protection
         try {
           // Set a timeout for this specific fetch
           const topRatedPromise = getRecipes({
@@ -47,7 +47,7 @@ const HomePage = () => {
           setTopRatedRecipes([]);
         }
         
-        // Fetch latest recipes
+        // Fetch latest recipes with timeout protection
         try {
           // Set a timeout for this specific fetch
           const latestPromise = getRecipes({
@@ -137,19 +137,19 @@ const HomePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-rose-50">
-      {/* Cute floating elements */}
+    <div className="min-h-screen bg-gray-50">
+      {/* Floating elements */}
       <div className="hidden md:block">
-        <div className="fixed top-20 left-10 animate-bounce-slow opacity-20 text-pink-400">
+        <div className="fixed top-20 left-10 animate-bounce-slow opacity-20 text-primary">
           <FaUtensils size={30} />
         </div>
-        <div className="fixed top-40 right-10 animate-pulse opacity-20 text-pink-400">
+        <div className="fixed top-40 right-10 animate-pulse opacity-20 text-primary">
           <FaHeart size={30} />
         </div>
-        <div className="fixed bottom-20 left-20 animate-pulse opacity-20 text-pink-400">
+        <div className="fixed bottom-20 left-20 animate-pulse opacity-20 text-primary">
           <FaClock size={30} />
         </div>
-        <div className="fixed bottom-60 right-20 animate-bounce-slow opacity-20 text-pink-400">
+        <div className="fixed bottom-60 right-20 animate-bounce-slow opacity-20 text-primary">
           <FaStar size={30} />
         </div>
       </div>
@@ -158,7 +158,7 @@ const HomePage = () => {
       {showHeartAnimation && (
         <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
           <div className="animate-float-up-and-fade">
-            <FaHeart className="text-pink-500" size={80} />
+            <FaHeart className="text-primary" size={80} />
           </div>
         </div>
       )}
@@ -173,14 +173,13 @@ const HomePage = () => {
             muted 
             playsInline
             className="w-full h-full object-cover"
-            style={{ filter: 'brightness(0.7)' }}
           >
             <source src="/IMG_9234.MOV" type="video/mp4" />
             {/* Fallback background if video fails to load */}
-            <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-rose-400"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary-dark"></div>
           </video>
-          {/* Overlay to ensure text readability with a cute gradient */}
-          <div className="absolute inset-0 bg-gradient-to-b from-pink-500/30 to-rose-600/50"></div>
+          {/* Overlay to ensure text readability */}
+          <div className="absolute inset-0 bg-black/40"></div>
         </div>
 
         {/* Content */}
@@ -189,7 +188,7 @@ const HomePage = () => {
             <div className="animate-bounce-slow inline-block mb-4">
               <FaUtensils className="text-white text-4xl mx-auto" />
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 font-cursive text-white drop-shadow-md">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white drop-shadow-md">
               {t('app_name')}
             </h1>
             <p className="text-xl mb-8 text-white drop-shadow-sm font-light">
@@ -201,27 +200,27 @@ const HomePage = () => {
               <div className="flex flex-col md:flex-row gap-2 drop-shadow-lg">
                 <div className="relative flex-grow">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <FaSearch className="text-pink-300" />
+                    <FaSearch className="text-gray-400" />
                   </div>
                   <input
                     type="text"
                     value={ingredients}
                     onChange={(e) => setIngredients(e.target.value)}
-                    className="block w-full py-4 pl-12 pr-4 text-gray-700 bg-white border-0 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 shadow-inner"
+                    className="block w-full py-4 pl-12 pr-4 text-gray-700 bg-white border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary shadow-inner"
                     placeholder={t('ingredients_placeholder')}
                   />
                 </div>
                 <div className="flex gap-2">
                   <button
                     type="submit"
-                    className="py-4 px-8 bg-gradient-to-r from-pink-400 to-rose-500 text-white font-medium rounded-full hover:from-pink-500 hover:to-rose-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-400 shadow-md transition-all duration-300 transform hover:scale-105"
+                    className="py-4 px-8 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary shadow-md transition-all duration-300"
                   >
                     {t('find_recipes')}
                   </button>
                   <button
                     type="button"
                     onClick={handleAskCookie}
-                    className="py-4 px-6 bg-white/90 backdrop-blur-sm text-pink-500 font-medium rounded-full hover:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-400 flex items-center shadow-md transition-all duration-300 transform hover:scale-105"
+                    className="py-4 px-6 bg-white text-primary font-medium rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary flex items-center shadow-md transition-all duration-300"
                   >
                     <FaRobot className="mr-2" />
                     {t('ask_Cookie')}
@@ -232,8 +231,8 @@ const HomePage = () => {
             
             {/* Features */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-12">
-              <div className="bg-white/20 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/30 transform hover:scale-105 transition-transform duration-300">
-                <div className="text-white text-3xl mb-4 bg-pink-400/40 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto">
+              <div className="bg-white/20 backdrop-blur-sm p-6 rounded-lg shadow-xl border border-white/30 transform hover:scale-105 transition-transform duration-300">
+                <div className="text-white text-3xl mb-4 bg-white/20 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto">
                   <FaMicrophone className="mx-auto" />
                 </div>
                 <h3 className="text-lg font-semibold mb-2">{t('voice_control')}</h3>
@@ -242,8 +241,8 @@ const HomePage = () => {
                 </p>
               </div>
               
-              <div className="bg-white/20 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/30 transform hover:scale-105 transition-transform duration-300">
-                <div className="text-white text-3xl mb-4 bg-pink-400/40 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto">
+              <div className="bg-white/20 backdrop-blur-sm p-6 rounded-lg shadow-xl border border-white/30 transform hover:scale-105 transition-transform duration-300">
+                <div className="text-white text-3xl mb-4 bg-white/20 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto">
                   <FaCalculator className="mx-auto" />
                 </div>
                 <h3 className="text-lg font-semibold mb-2">{t('nutrition_calc')}</h3>
@@ -252,8 +251,8 @@ const HomePage = () => {
                 </p>
               </div>
               
-              <div className="bg-white/20 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/30 transform hover:scale-105 transition-transform duration-300">
-                <div className="text-white text-3xl mb-4 bg-pink-400/40 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto">
+              <div className="bg-white/20 backdrop-blur-sm p-6 rounded-lg shadow-xl border border-white/30 transform hover:scale-105 transition-transform duration-300">
+                <div className="text-white text-3xl mb-4 bg-white/20 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto">
                   <FaLanguage className="mx-auto" />
                 </div>
                 <h3 className="text-lg font-semibold mb-2">{t('multilingual')}</h3>
@@ -265,31 +264,31 @@ const HomePage = () => {
           </div>
         </div>
         
-        {/* Cute wavy divider */}
+        {/* Wavy divider */}
         <div className="absolute bottom-0 left-0 right-0">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120" className="fill-rose-50">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120" className="fill-gray-50">
             <path d="M0,64L60,80C120,96,240,128,360,122.7C480,117,600,75,720,64C840,53,960,75,1080,80C1200,85,1320,75,1380,69.3L1440,64L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"></path>
           </svg>
         </div>
       </div>
       
       {/* Top Rated Recipes */}
-      <div className="container mx-auto px-4 py-16">
-        <div className="flex items-center justify-center mb-10">
-          <div className="bg-pink-100 rounded-full p-3 mr-3">
-            <FaStar className="text-pink-500 text-xl" />
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex items-center justify-center mb-8">
+          <div className="bg-primary-light rounded-full p-3 mr-3">
+            <FaStar className="text-primary text-xl" />
           </div>
-          <h2 className="text-3xl font-bold text-gray-800 font-cursive">
+          <h2 className="text-3xl font-bold text-gray-800">
             {t('top_rated_recipes')}
           </h2>
         </div>
         
         {loading ? (
           <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-pink-500"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-primary"></div>
           </div>
         ) : topRatedRecipes.length === 0 ? (
-          <div className="text-center py-8 bg-white rounded-2xl shadow-md border border-pink-100">
+          <div className="text-center py-8 bg-white rounded-lg shadow-md">
             <p className="text-gray-500">{t('no_recipes_found')}</p>
           </div>
         ) : (
@@ -303,24 +302,24 @@ const HomePage = () => {
         )}
       </div>
       
-      {/* Latest Recipes with cute background */}
-      <div className="bg-gradient-to-b from-rose-100 to-white py-16 rounded-t-[50px] mt-8">
+      {/* Latest Recipes */}
+      <div className="bg-gray-100 py-12 rounded-t-[50px] mt-8">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-center mb-10">
-            <div className="bg-pink-100 rounded-full p-3 mr-3">
-              <FaClock className="text-pink-500 text-xl" />
+          <div className="flex items-center justify-center mb-8">
+            <div className="bg-primary-light rounded-full p-3 mr-3">
+              <FaClock className="text-primary text-xl" />
             </div>
-            <h2 className="text-3xl font-bold text-gray-800 font-cursive">
+            <h2 className="text-3xl font-bold text-gray-800">
               {t('latest_recipes')}
             </h2>
           </div>
           
           {loading ? (
             <div className="flex justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-pink-500"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-primary"></div>
             </div>
           ) : latestRecipes.length === 0 ? (
-            <div className="text-center py-8 bg-white rounded-2xl shadow-md border border-pink-100">
+            <div className="text-center py-8 bg-white rounded-lg shadow-md">
               <p className="text-gray-500">{t('no_recipes_found')}</p>
             </div>
           ) : (
@@ -336,6 +335,6 @@ const HomePage = () => {
       </div>
     </div>
   );
-}
+};
 
 export default HomePage;
