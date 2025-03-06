@@ -1,6 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { FaEdit, FaTrash, FaSearch, FaCheck, FaTimes, FaFilter } from 'react-icons/fa';
+import { 
+  FaEdit, 
+  FaTrash, 
+  FaSearch, 
+  FaCheck, 
+  FaTimes, 
+  FaFilter, 
+  FaEye, 
+  FaCheckCircle,
+  FaClock,
+  FaCookieBite,
+  FaUtensils
+} from 'react-icons/fa';
 import { useLanguage } from '../../context/LanguageContext';
 import { getRecipes, updateRecipe, deleteRecipe } from '../../services/recipeService';
 import { moderateRecipe } from '../../services/adminService';
@@ -27,11 +39,13 @@ const RecipesPage = () => {
   const [moderationRecipe, setModerationRecipe] = useState(null);
   const [moderationStatus, setModerationStatus] = useState('approved');
   const [moderationNote, setModerationNote] = useState('');
+  const [showAnimation, setShowAnimation] = useState(false);
   
   // Fetch recipes
   const fetchRecipes = useCallback(async () => {
     try {
       setLoading(true);
+      setShowAnimation(true);
       
       // Prepare query params
       const params = {
@@ -54,6 +68,7 @@ const RecipesPage = () => {
       toast.error(error || t('error_occurred'));
     } finally {
       setLoading(false);
+      setTimeout(() => setShowAnimation(false), 1000);
     }
   }, [currentPage, filters, t]);
   
@@ -221,269 +236,308 @@ const RecipesPage = () => {
     recipe.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
   
-  // Get status badge color
-  const getStatusBadgeColor = (status) => {
+  // Get status badge color and style
+  const getStatusBadge = (status) => {
     switch(status) {
       case 'approved':
-        return 'bg-green-100 text-green-800';
+        return {
+          className: 'bg-green-100 text-green-800 border border-green-200',
+          icon: <FaCheckCircle className="mr-1" size={10} />
+        };
       case 'rejected':
-        return 'bg-red-100 text-red-800';
+        return {
+          className: 'bg-red-100 text-red-800 border border-red-200',
+          icon: <FaTimes className="mr-1" size={10} />
+        };
       case 'pending':
       default:
-        return 'bg-yellow-100 text-yellow-800';
+        return {
+          className: 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+          icon: <FaClock className="mr-1" size={10} />
+        };
     }
   };
   
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-rose-50">
       <AdminSidebar />
       
-      <div className="flex-1 p-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">{t('manage_recipes')}</h1>
-        </div>
-        
-        {/* Search and Filter */}
-        <div className="mb-6 flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
-          <div className="relative flex-grow">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FaSearch className="text-gray-400" />
+      {/* Loading animation overlay */}
+      {showAnimation && (
+        <div className="fixed inset-0 bg-pink-500/20 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="text-center">
+            <div className="animate-float">
+              <FaCookieBite className="text-pink-500 text-5xl mx-auto" />
             </div>
-            <input
-              type="text"
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary sm:text-sm"
-              placeholder={t('search_recipes')}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+            <p className="text-pink-600 font-medium text-xl mt-4">{t('loading_recipes')}...</p>
+          </div>
+        </div>
+      )}
+      
+      <div className="pb-6">
+        {/* Page header */}
+        <div className="bg-white shadow-md p-6 mb-8 border-b border-pink-100">
+          <div className="flex items-center">
+            <div className="bg-pink-100 p-3 rounded-full mr-3">
+              <FaUtensils className="text-pink-500" size={20} />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-800">{t('manage_recipes')}</h1>
+          </div>
+        </div>
+      
+        <div className="px-6">
+          {/* Search and Filter */}
+          <div className="mb-6">
+            <div className="bg-white rounded-3xl shadow-lg p-4 border border-pink-100">
+              <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+                <div className="relative flex-grow">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <FaSearch className="text-pink-400" />
+                  </div>
+                  <input
+                    type="text"
+                    className="block w-full pl-12 pr-4 py-3 bg-pink-50 border border-pink-100 rounded-xl shadow-inner placeholder-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent"
+                    placeholder={t('search_recipes')}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+                
+                <button
+                  type="button"
+                  onClick={() => setFiltersOpen(!filtersOpen)}
+                  className="bg-pink-50 text-pink-500 px-6 py-3 rounded-xl hover:bg-pink-100 flex items-center space-x-2 flex-shrink-0 border border-pink-100 font-medium transition-colors duration-300"
+                >
+                  <FaFilter />
+                  <span>{t('filters')}</span>
+                </button>
+              </div>
+              
+              {/* Filters Panel */}
+              {filtersOpen && (
+                <div className="mt-6 p-4 bg-pink-50 rounded-xl border border-pink-100 animate-slide-up">
+                  <h3 className="font-semibold text-gray-700 mb-4">{t('filter_recipes')}</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {t('status')}
+                      </label>
+                      <select
+                        value={filters.status}
+                        onChange={(e) => setFilters({...filters, status: e.target.value})}
+                        className="block w-full pl-3 pr-10 py-2 text-base bg-white border-pink-100 focus:outline-none focus:ring-pink-300 focus:border-pink-300 rounded-xl shadow-sm"
+                      >
+                        <option value="all">{t('all')}</option>
+                        <option value="pending">{t('pending')}</option>
+                        <option value="approved">{t('approved')}</option>
+                        <option value="rejected">{t('rejected')}</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-6 flex justify-end space-x-3">
+                    <button
+                      type="button"
+                      onClick={resetFilters}
+                      className="px-4 py-2 border border-pink-200 rounded-xl text-pink-500 hover:bg-pink-100 transition-colors duration-300"
+                    >
+                      {t('reset')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={applyFilters}
+                      className="px-4 py-2 bg-gradient-to-r from-pink-400 to-rose-500 text-white rounded-xl hover:from-pink-500 hover:to-rose-600 shadow-md transition-all duration-300"
+                    >
+                      {t('apply_filters')}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
           
-          <button
-            type="button"
-            onClick={() => setFiltersOpen(!filtersOpen)}
-            className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 flex items-center space-x-2 flex-shrink-0"
-          >
-            <FaFilter />
-            <span>{t('filters')}</span>
-          </button>
-        </div>
-        
-        {/* Filters Panel */}
-        {filtersOpen && (
-          <div className="mb-6 p-4 bg-white rounded-lg shadow-md">
-            <h3 className="font-semibold text-gray-700 mb-4">{t('filter_recipes')}</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('status')}
-                </label>
-                <select
-                  value={filters.status}
-                  onChange={(e) => setFilters({...filters, status: e.target.value})}
-                  className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md"
-                >
-                  <option value="all">{t('all')}</option>
-                  <option value="pending">{t('pending')}</option>
-                  <option value="approved">{t('approved')}</option>
-                  <option value="rejected">{t('rejected')}</option>
-                </select>
+          {/* Recipes Table */}
+          <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-pink-100">
+            {loading && !recipes.length ? (
+              <div className="flex justify-center items-center p-8">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-pink-500"></div>
               </div>
-            </div>
-            
-            <div className="mt-4 flex justify-end space-x-3">
-              <button
-                type="button"
-                onClick={resetFilters}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-              >
-                {t('reset')}
-              </button>
-              <button
-                type="button"
-                onClick={applyFilters}
-                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
-              >
-                {t('apply_filters')}
-              </button>
-            </div>
-          </div>
-        )}
-        
-        {/* Recipes Table */}
-        <div className="bg-white shadow-md rounded-lg overflow-hidden">
-          {loading && !recipes.length ? (
-            <div className="flex justify-center items-center p-8">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-primary"></div>
-            </div>
-          ) : (
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('title')}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('rating')}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('status')}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('created_at')}
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('actions')}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredRecipes.length === 0 ? (
+            ) : (
+              <table className="min-w-full divide-y divide-pink-100">
+                <thead className="bg-pink-50">
                   <tr>
-                    <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
-                      {searchTerm ? t('no_matching_recipes') : t('no_recipes')}
-                    </td>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-pink-500 uppercase tracking-wider">
+                      {t('title')}
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-pink-500 uppercase tracking-wider">
+                      {t('rating')}
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-pink-500 uppercase tracking-wider">
+                      {t('status')}
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-pink-500 uppercase tracking-wider">
+                      {t('created_at')}
+                    </th>
+                    <th className="px-6 py-4 text-right text-xs font-medium text-pink-500 uppercase tracking-wider">
+                      {t('actions')}
+                    </th>
                   </tr>
-                ) : (
-                  filteredRecipes.map(recipe => (
-                    <tr key={recipe._id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10">
-                            <img 
-                              src={recipe.image || '/default-recipe.jpg'} 
-                              alt={recipe.title}
-                              className="h-10 w-10 rounded-full object-cover"
-                            />
-                          </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {recipe.title}
-                            </div>
-                            <div className="text-sm text-gray-500 truncate w-48">
-                              {recipe.description}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <span className="text-yellow-500 mr-1">★</span>
-                          <span>{recipe.averageRating.toFixed(1)}</span>
-                          <span className="text-gray-400 ml-1">({recipe.ratingCount})</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          getStatusBadgeColor(recipe.status || 'pending')
-                        }`}>
-                          {recipe.status || t('pending')}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatDate(recipe.createdAt)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        {confirmDelete && confirmDelete._id === recipe._id ? (
-                          <div className="flex justify-end space-x-2">
-                            <button
-                              onClick={handleDeleteConfirmed}
-                              className="text-red-600 hover:text-red-800"
-                              disabled={loading}
-                            >
-                              <FaCheck />
-                            </button>
-                            <button
-                              onClick={handleDeleteCancel}
-                              className="text-gray-600 hover:text-gray-800"
-                            >
-                              <FaTimes />
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex justify-end space-x-2">
-                            <Link
-                              to={`/recipes/${recipe._id}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:text-blue-800"
-                            >
-                              <span className="sr-only">{t('view')}</span>
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                                <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-                              </svg>
-                            </Link>
-                            
-                            <button
-                              onClick={() => handleModerate(recipe)}
-                              className="text-purple-600 hover:text-purple-800"
-                            >
-                              <span className="sr-only">{t('moderate')}</span>
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                              </svg>
-                            </button>
-                            
-                            <button
-                              onClick={() => handleEdit(recipe)}
-                              className="text-indigo-600 hover:text-indigo-800"
-                            >
-                              <FaEdit />
-                            </button>
-                            
-                            <button
-                              onClick={() => handleDeleteConfirm(recipe)}
-                              className="text-red-600 hover:text-red-800"
-                            >
-                              <FaTrash />
-                            </button>
-                          </div>
-                        )}
+                </thead>
+                <tbody className="bg-white divide-y divide-pink-100">
+                  {filteredRecipes.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
+                        {searchTerm ? t('no_matching_recipes') : t('no_recipes')}
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          )}
-          
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="px-6 py-4 flex justify-between items-center bg-gray-50">
-              <div className="text-sm text-gray-500">
-                {t('showing')} {recipes.length} {t('of')} {totalPages * 10} {t('recipes')}
+                  ) : (
+                    filteredRecipes.map(recipe => (
+                      <tr key={recipe._id} className="hover:bg-pink-50 transition-colors duration-200">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 h-14 w-14 rounded-xl border-2 border-pink-100 overflow-hidden shadow-sm">
+                              <img 
+                                src={recipe.image || '/default-recipe.jpg'} 
+                                alt={recipe.title}
+                                className="h-full w-full object-cover"
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.src = '/default-recipe.jpg';
+                                }}
+                              />
+                            </div>
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">
+                                {recipe.title}
+                              </div>
+                              <div className="text-sm text-gray-500 truncate w-48">
+                                {recipe.description}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <span className="text-yellow-400 mr-1">★</span>
+                            <span className="font-medium">{recipe.averageRating.toFixed(1)}</span>
+                            <span className="text-gray-400 ml-1">({recipe.ratingCount})</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {(() => {
+                            const badge = getStatusBadge(recipe.status || 'pending');
+                            return (
+                              <span className={`px-3 py-1.5 inline-flex items-center text-xs leading-5 font-medium rounded-full ${badge.className}`}>
+                                {badge.icon}
+                                {recipe.status || t('pending')}
+                              </span>
+                            );
+                          })()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {formatDate(recipe.createdAt)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          {confirmDelete && confirmDelete._id === recipe._id ? (
+                            <div className="flex justify-end space-x-2">
+                              <button
+                                onClick={handleDeleteConfirmed}
+                                className="text-white bg-red-500 hover:bg-red-600 p-2 rounded-full shadow-sm transition-colors"
+                                disabled={loading}
+                              >
+                                <FaCheck size={14} />
+                              </button>
+                              <button
+                                onClick={handleDeleteCancel}
+                                className="text-white bg-gray-400 hover:bg-gray-500 p-2 rounded-full shadow-sm transition-colors"
+                              >
+                                <FaTimes size={14} />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex justify-end space-x-2">
+                              <Link
+                                to={`/recipes/${recipe._id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-500 hover:text-blue-600 bg-blue-50 hover:bg-blue-100 p-2 rounded-full transition-colors"
+                                title={t('view')}
+                              >
+                                <FaEye size={14} />
+                              </Link>
+                              
+                              <button
+                                onClick={() => handleModerate(recipe)}
+                                className="text-purple-500 hover:text-purple-600 bg-purple-50 hover:bg-purple-100 p-2 rounded-full transition-colors"
+                                title={t('moderate')}
+                              >
+                                <FaCheckCircle size={14} />
+                              </button>
+                              
+                              <button
+                                onClick={() => handleEdit(recipe)}
+                                className="text-green-500 hover:text-green-600 bg-green-50 hover:bg-green-100 p-2 rounded-full transition-colors"
+                                title={t('edit')}
+                              >
+                                <FaEdit size={14} />
+                              </button>
+                              
+                              <button
+                                onClick={() => handleDeleteConfirm(recipe)}
+                                className="text-red-500 hover:text-red-600 bg-red-50 hover:bg-red-100 p-2 rounded-full transition-colors"
+                                title={t('delete')}
+                              >
+                                <FaTrash size={14} />
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            )}
+            
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="px-6 py-4 flex justify-between items-center bg-pink-50 border-t border-pink-100">
+                <div className="text-sm text-gray-600">
+                  {t('showing')} {recipes.length} {t('of')} {totalPages * 10} {t('recipes')}
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 border border-pink-200 rounded-xl text-pink-500 hover:bg-pink-100 disabled:opacity-50 disabled:hover:bg-white disabled:text-pink-300 transition-colors shadow-sm"
+                  >
+                    {t('previous')}
+                  </button>
+                  <span className="px-4 py-2 border border-pink-200 rounded-xl bg-white font-medium text-pink-500 shadow-sm">
+                    {currentPage} / {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="px-4 py-2 border border-pink-200 rounded-xl text-pink-500 hover:bg-pink-100 disabled:opacity-50 disabled:hover:bg-white disabled:text-pink-300 transition-colors shadow-sm"
+                  >
+                    {t('next')}
+                  </button>
+                </div>
               </div>
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50"
-                >
-                  {t('previous')}
-                </button>
-                <span className="px-3 py-1 border border-gray-300 rounded-md text-sm bg-gray-100">
-                  {currentPage} / {totalPages}
-                </span>
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50"
-                >
-                  {t('next')}
-                </button>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
       
       {/* Edit Recipe Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800">
+        <div className="fixed inset-0 bg-pink-500/20 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-3xl shadow-xl max-w-3xl w-full border border-pink-100">
+            <div className="px-6 py-4 border-b border-pink-100">
+              <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                <FaEdit className="text-pink-500 mr-2" />
                 {t('edit_recipe')}
               </h3>
             </div>
@@ -502,11 +556,11 @@ const RecipesPage = () => {
                       value={formik.values.title}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
-                      className={`w-full px-3 py-2 border ${
+                      className={`w-full px-4 py-3 rounded-xl bg-pink-50 shadow-inner ${
                         formik.touched.title && formik.errors.title
-                          ? 'border-red-500'
-                          : 'border-gray-300'
-                      } rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary`}
+                          ? 'border-red-300 focus:ring-red-300'
+                          : 'border-pink-100 focus:ring-pink-300'
+                      } focus:outline-none focus:ring-2 focus:border-transparent`}
                     />
                     {formik.touched.title && formik.errors.title && (
                       <p className="mt-1 text-sm text-red-500">{formik.errors.title}</p>
@@ -524,11 +578,11 @@ const RecipesPage = () => {
                       value={formik.values.description}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
-                      className={`w-full px-3 py-2 border ${
+                      className={`w-full px-4 py-3 rounded-xl bg-pink-50 shadow-inner ${
                         formik.touched.description && formik.errors.description
-                          ? 'border-red-500'
-                          : 'border-gray-300'
-                      } rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary`}
+                          ? 'border-red-300 focus:ring-red-300'
+                          : 'border-pink-100 focus:ring-pink-300'
+                      } focus:outline-none focus:ring-2 focus:border-transparent`}
                     ></textarea>
                     {formik.touched.description && formik.errors.description && (
                       <p className="mt-1 text-sm text-red-500">{formik.errors.description}</p>
@@ -546,11 +600,11 @@ const RecipesPage = () => {
                       value={formik.values.totalTime}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
-                      className={`w-full px-3 py-2 border ${
+                      className={`w-full px-4 py-3 rounded-xl bg-pink-50 shadow-inner ${
                         formik.touched.totalTime && formik.errors.totalTime
-                          ? 'border-red-500'
-                          : 'border-gray-300'
-                      } rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary`}
+                          ? 'border-red-300 focus:ring-red-300'
+                          : 'border-pink-100 focus:ring-pink-300'
+                      } focus:outline-none focus:ring-2 focus:border-transparent`}
                     />
                     {formik.touched.totalTime && formik.errors.totalTime && (
                       <p className="mt-1 text-sm text-red-500">{formik.errors.totalTime}</p>
@@ -572,11 +626,11 @@ const RecipesPage = () => {
                         formik.setFieldValue('ingredientsString', e.target.value);
                       }}
                       onBlur={formik.handleBlur}
-                      className={`w-full px-3 py-2 border ${
+                      className={`w-full px-4 py-3 rounded-xl bg-pink-50 shadow-inner ${
                         formik.touched.ingredients && formik.errors.ingredients
-                          ? 'border-red-500'
-                          : 'border-gray-300'
-                      } rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary`}
+                          ? 'border-red-300 focus:ring-red-300'
+                          : 'border-pink-100 focus:ring-pink-300'
+                      } focus:outline-none focus:ring-2 focus:border-transparent`}
                       placeholder={t('ingredients_placeholder')}
                     ></textarea>
                     <p className="mt-1 text-xs text-gray-500">{t('ingredients_hint')}</p>
@@ -600,11 +654,11 @@ const RecipesPage = () => {
                         formik.setFieldValue('instructionsString', e.target.value);
                       }}
                       onBlur={formik.handleBlur}
-                      className={`w-full px-3 py-2 border ${
+                      className={`w-full px-4 py-3 rounded-xl bg-pink-50 shadow-inner ${
                         formik.touched.instructions && formik.errors.instructions
-                          ? 'border-red-500'
-                          : 'border-gray-300'
-                      } rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary`}
+                          ? 'border-red-300 focus:ring-red-300'
+                          : 'border-pink-100 focus:ring-pink-300'
+                      } focus:outline-none focus:ring-2 focus:border-transparent`}
                       placeholder={t('instructions_placeholder')}
                     ></textarea>
                     <p className="mt-1 text-xs text-gray-500">{t('instructions_hint')}</p>
@@ -615,18 +669,18 @@ const RecipesPage = () => {
                 </div>
               </div>
               
-              <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+              <div className="px-6 py-4 border-t border-pink-100 flex justify-end space-x-3">
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                  className="px-4 py-2 border border-pink-200 rounded-xl text-pink-500 hover:bg-pink-100 transition-colors shadow-sm"
                 >
                   {t('cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                  className="px-4 py-2 bg-gradient-to-r from-pink-400 to-rose-500 text-white rounded-xl hover:from-pink-500 hover:to-rose-600 shadow-md transition-all duration-300"
                 >
                   {loading ? t('saving') : t('save')}
                 </button>
@@ -636,84 +690,84 @@ const RecipesPage = () => {
         </div>
       )}
       
-      {/* Moderation Modal */}
       {moderationModal && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800">
-                {t('moderate_recipe')}
-              </h3>
-            </div>
-            
-            <div className="p-6">
-              <div className="mb-4">
-                <h4 className="font-medium text-gray-800">{moderationRecipe?.title}</h4>
-                <p className="text-sm text-gray-500 mt-1">{moderationRecipe?.description}</p>
-              </div>
-              
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('status')}
-                </label>
-                <div className="flex space-x-4">
-                  <label className="inline-flex items-center">
-                    <input
-                      type="radio"
-                      name="status"
-                      value="approved"
-                      checked={moderationStatus === 'approved'}
-                      onChange={() => setModerationStatus('approved')}
-                      className="form-radio h-4 w-4 text-primary"
-                    />
-                    <span className="ml-2 text-sm text-gray-700">{t('approved')}</span>
-                  </label>
-                  <label className="inline-flex items-center">
-                    <input
-                      type="radio"
-                      name="status"
-                      value="rejected"
-                      checked={moderationStatus === 'rejected'}
-                      onChange={() => setModerationStatus('rejected')}
-                      className="form-radio h-4 w-4 text-red-600"
-                    />
-                    <span className="ml-2 text-sm text-gray-700">{t('rejected')}</span>
-                  </label>
-                </div>
-              </div>
-              
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('moderation_note')}
-                </label>
-                <textarea
-                  value={moderationNote}
-                  onChange={(e) => setModerationNote(e.target.value)}
-                  rows="3"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
-                  placeholder={moderationStatus === 'rejected' ? t('rejection_reason') : t('moderation_note_placeholder')}
-                ></textarea>
-                {moderationStatus === 'rejected' && (
-                  <p className="mt-1 text-xs text-gray-500">{t('rejection_reason_required')}</p>
-                )}
-              </div>
-              
-              <div className="flex justify-end space-x-3 mt-6">
-                <button
-                  type="button"
-                  onClick={() => setModerationModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                >
-                  {t('cancel')}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleModerationSubmit}
-                  disabled={loading || (moderationStatus === 'rejected' && !moderationNote.trim())}
-                  className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark disabled:opacity-50"
-                >
-                  {loading ? t('saving') : t('submit')}
-                </button>
+  <div className="fixed inset-0 bg-pink-500/20 backdrop-blur-sm flex items-center justify-center z-50">
+    <div className="bg-white rounded-3xl shadow-xl max-w-md w-full border border-pink-100">
+      <div className="px-6 py-4 border-b border-pink-100">
+        <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+          <FaCheckCircle className="text-pink-500 mr-2" />
+          {t('moderate_recipe')}
+        </h3>
+      </div>
+      
+      <div className="p-6">
+        <div className="mb-4 bg-pink-50 p-4 rounded-xl border border-pink-100">
+          <h4 className="font-medium text-gray-800">{moderationRecipe?.title}</h4>
+          <p className="text-sm text-gray-500 mt-1">{moderationRecipe?.description}</p>
+        </div>
+        
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t('status')}
+          </label>
+          <div className="flex space-x-4">
+            <label className="inline-flex items-center p-2 bg-green-50 rounded-xl border border-green-100 cursor-pointer transition-colors hover:bg-green-100">
+              <input
+                type="radio"
+                name="status"
+                value="approved"
+                checked={moderationStatus === 'approved'}
+                onChange={() => setModerationStatus('approved')}
+                className="form-radio h-4 w-4 text-green-500 focus:ring-green-400"
+              />
+              <span className="ml-2 text-sm text-green-700 font-medium">{t('approved')}</span>
+            </label>
+            <label className="inline-flex items-center p-2 bg-red-50 rounded-xl border border-red-100 cursor-pointer transition-colors hover:bg-red-100">
+              <input
+                type="radio"
+                name="status"
+                value="rejected"
+                checked={moderationStatus === 'rejected'}
+                onChange={() => setModerationStatus('rejected')}
+                className="form-radio h-4 w-4 text-red-500 focus:ring-red-400"
+              />
+              <span className="ml-2 text-sm text-red-700 font-medium">{t('rejected')}</span>
+            </label>
+          </div>
+        </div>
+        
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t('moderation_note')}
+          </label>
+          <textarea
+            value={moderationNote}
+            onChange={(e) => setModerationNote(e.target.value)}
+            rows="3"
+            className="w-full px-4 py-3 rounded-xl bg-pink-50 shadow-inner border-pink-100 focus:ring-pink-300 focus:outline-none focus:ring-2 focus:border-transparent"
+            placeholder={moderationStatus === 'rejected' ? t('rejection_reason') : t('moderation_note_placeholder')}
+          ></textarea>
+          {moderationStatus === 'rejected' && (
+            <p className="mt-1 text-xs text-red-500">{t('rejection_reason_required')}</p>
+          )}
+        </div>
+        
+        <div className="flex justify-end space-x-3 mt-6">
+          <button
+            type="button"
+            onClick={() => setModerationModal(false)}
+            className="px-4 py-2 border border-pink-200 rounded-xl text-pink-500 hover:bg-pink-100 transition-colors shadow-sm"
+          >
+            {t('cancel')}
+          </button>
+          <button
+            type="button"
+            onClick={handleModerationSubmit}
+            disabled={loading || (moderationStatus === 'rejected' && !moderationNote.trim())}
+            className="px-4 py-2 bg-gradient-to-r from-pink-400 to-rose-500 text-white rounded-xl hover:from-pink-500 hover:to-rose-600 shadow-md transition-all duration-300 disabled:opacity-50 disabled:hover:from-pink-400 disabled:hover:to-rose-500"
+          >
+            {loading ? t('saving') : t('submit')}
+          </button>
               </div>
             </div>
           </div>

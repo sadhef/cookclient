@@ -1,6 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { FaStar, FaTrash, FaSearch, FaCheck, FaTimes, FaUser, FaFilter, FaUtensils } from 'react-icons/fa';
+import { 
+  FaStar, 
+  FaTrash, 
+  FaSearch, 
+  FaCheck, 
+  FaTimes, 
+  FaUser, 
+  FaFilter, 
+  FaUtensils,
+  FaComment,
+  FaCommentAlt,
+  FaCookieBite
+} from 'react-icons/fa';
 import { useLanguage } from '../../context/LanguageContext';
 import { getRecipes } from '../../services/recipeService';
 import { getRecipeReviews } from '../../services/reviewService';
@@ -17,17 +29,20 @@ const Reviews = () => {
   const [recipes, setRecipes] = useState([]);
   const [selectedRecipe, setSelectedRecipe] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [showAnimation, setShowAnimation] = useState(false);
   
   // Fallback method: fetch reviews from all recipes
   const fetchReviewsByRecipes = useCallback(async () => {
     try {
       setLoading(true);
+      setShowAnimation(true);
       const allReviews = [];
       
       // If there are no recipes yet, return early
       if (recipes.length === 0) {
         setLoading(false);
         setReviews([]);
+        setTimeout(() => setShowAnimation(false), 1000);
         return;
       }
       
@@ -71,6 +86,7 @@ const Reviews = () => {
       setReviews([]);
     } finally {
       setLoading(false);
+      setTimeout(() => setShowAnimation(false), 1000);
     }
   }, [recipes, t]);
   
@@ -78,6 +94,7 @@ const Reviews = () => {
   const fetchAllReviews = useCallback(async () => {
     try {
       setLoading(true);
+      setShowAnimation(true);
       
       // Try to use the admin-specific endpoint to get all reviews
       const response = await api.get('/admin/reviews');
@@ -102,6 +119,7 @@ const Reviews = () => {
       await fetchReviewsByRecipes();
     } finally {
       setLoading(false);
+      setTimeout(() => setShowAnimation(false), 1000);
     }
   }, [fetchReviewsByRecipes]);
   
@@ -109,6 +127,7 @@ const Reviews = () => {
   const fetchReviewsForRecipe = useCallback(async (recipeId) => {
     try {
       setLoading(true);
+      setShowAnimation(true);
       
       // Use the service function instead of direct API call
       const recipeReviews = await getRecipeReviews(recipeId);
@@ -140,6 +159,7 @@ const Reviews = () => {
       setReviews([]);
     } finally {
       setLoading(false);
+      setTimeout(() => setShowAnimation(false), 1000);
     }
   }, [recipes, t]);
   
@@ -250,29 +270,43 @@ const Reviews = () => {
   };
   
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-rose-50">
       <AdminSidebar />
+      
+      {/* Loading animation overlay */}
+      {showAnimation && (
+        <div className="fixed inset-0 bg-pink-500/20 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="text-center">
+            <div className="animate-float">
+              <FaCommentAlt className="text-pink-500 text-5xl mx-auto" />
+            </div>
+            <p className="text-pink-600 font-medium text-xl mt-4">{t('loading_reviews')}...</p>
+          </div>
+        </div>
+      )}
       
       <div className="pb-6">
         {/* Page header */}
-        <div className="bg-white shadow-sm p-6 mb-6">
-          <h1 className="text-2xl font-bold text-gray-800 flex items-center">
-            <FaStar className="text-primary mr-3" />
-            {t('manage_reviews')}
-          </h1>
+        <div className="bg-white shadow-md p-6 mb-8 border-b border-pink-100">
+          <div className="flex items-center">
+            <div className="bg-pink-100 p-3 rounded-full mr-3">
+              <FaStar className="text-pink-500" size={20} />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-800">{t('manage_reviews')}</h1>
+          </div>
         </div>
         
         {/* Search and filters */}
         <div className="px-6 mb-6">
-          <div className="bg-white rounded-lg shadow-sm p-4">
+          <div className="bg-white rounded-3xl shadow-lg p-4 border border-pink-100">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-grow">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaSearch className="text-gray-400" />
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <FaSearch className="text-pink-400" />
                 </div>
                 <input
                   type="text"
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                  className="block w-full pl-12 pr-4 py-3 bg-pink-50 border border-pink-100 rounded-xl shadow-inner placeholder-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent"
                   placeholder={t('search_reviews')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -281,22 +315,22 @@ const Reviews = () => {
               
               <button 
                 onClick={() => setShowFilters(!showFilters)}
-                className="md:w-auto w-full flex items-center justify-center gap-2 py-2 px-4 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="md:w-auto w-full flex items-center justify-center gap-2 py-3 px-6 bg-pink-50 border border-pink-100 rounded-xl hover:bg-pink-100 transition-colors text-pink-500 font-medium"
               >
-                <FaFilter className="text-gray-500" />
+                <FaFilter className="text-pink-400" />
                 <span>{t('filters')}</span>
               </button>
             </div>
             
             {showFilters && (
-              <div className="mt-4 pt-4 border-t border-gray-100">
+              <div className="mt-4 pt-4 border-t border-pink-100 animate-slide-up">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       {t('filter_by_recipe')}
                     </label>
                     <select
-                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                      className="w-full px-4 py-3 bg-white border border-pink-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent shadow-sm"
                       value={selectedRecipe}
                       onChange={(e) => setSelectedRecipe(e.target.value)}
                     >
@@ -316,17 +350,22 @@ const Reviews = () => {
         
         {/* Reviews list */}
         <div className="px-6">
-          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+          <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-pink-100">
             {loading ? (
               <div className="flex justify-center items-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-primary"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-pink-500"></div>
               </div>
             ) : filteredReviews.length === 0 ? (
               <div className="p-8 text-center text-gray-500">
-                {searchTerm || selectedRecipe ? t('no_matching_reviews') : t('no_reviews')}
+                <div className="flex justify-center mb-4">
+                  <div className="bg-pink-50 p-3 rounded-full">
+                    <FaComment className="text-pink-300" size={20} />
+                  </div>
+                </div>
+                <p>{searchTerm || selectedRecipe ? t('no_matching_reviews') : t('no_reviews')}</p>
               </div>
             ) : (
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-pink-100">
                 {filteredReviews.map((review, index) => {
                   if (!review || !review._id) return null;
                   
@@ -336,10 +375,10 @@ const Reviews = () => {
                   const comment = review.comment || t('no_comment');
                   
                   return (
-                    <div key={review._id || `review-${index}`} className="p-6 hover:bg-gray-50 transition-colors">
+                    <div key={review._id || `review-${index}`} className="p-6 hover:bg-pink-50 transition-colors duration-200">
                       <div className="flex items-start justify-between">
                         <div className="flex items-start space-x-4">
-                          <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                          <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center flex-shrink-0 border-2 border-pink-200 shadow-sm">
                             {review.user?.avatar ? (
                               <img 
                                 src={review.user.avatar} 
@@ -351,13 +390,13 @@ const Reviews = () => {
                                 }}
                               />
                             ) : (
-                              <FaUser className="text-gray-500" />
+                              <FaUser className="text-pink-400" />
                             )}
                           </div>
                           
                           <div>
                             <h3 className="font-medium text-gray-900">{userName}</h3>
-                            <p className="text-sm text-gray-500 mb-1">
+                            <p className="text-sm text-gray-500 mb-2">
                               {review.createdAt ? formatDate(review.createdAt) : t('unknown_date')}
                             </p>
                             
@@ -369,11 +408,11 @@ const Reviews = () => {
                               {recipeId ? (
                                 <Link
                                   to={`/recipes/${recipeId}`}
-                                  className="inline-flex items-center text-primary hover:underline"
+                                  className="inline-flex items-center text-pink-500 hover:text-pink-600 bg-pink-50 px-3 py-1 rounded-full text-sm border border-pink-100"
                                   target="_blank"
                                   rel="noopener noreferrer"
                                 >
-                                  <FaUtensils className="mr-1" size={14} />
+                                  <FaUtensils className="mr-2" size={12} />
                                   <span>{recipeName}</span>
                                 </Link>
                               ) : (
@@ -381,7 +420,12 @@ const Reviews = () => {
                               )}
                             </div>
                             
-                            <p className="text-gray-700">{comment}</p>
+                            <div className="bg-pink-50 p-3 rounded-xl border border-pink-100 relative shadow-sm">
+                              <div className="absolute -top-2 -left-2 transform rotate-12 text-pink-300">
+                                <FaCommentAlt size={14} />
+                              </div>
+                              <p className="text-gray-700">{comment}</p>
+                            </div>
                           </div>
                         </div>
                         
@@ -390,14 +434,14 @@ const Reviews = () => {
                             <div className="flex space-x-2">
                               <button
                                 onClick={handleDeleteConfirmed}
-                                className="text-white bg-red-500 hover:bg-red-600 rounded-full p-2 transition-colors"
+                                className="text-white bg-red-500 hover:bg-red-600 rounded-full p-2.5 transition-colors shadow-sm"
                                 title={t('confirm_delete')}
                               >
                                 <FaCheck size={14} />
                               </button>
                               <button
                                 onClick={handleDeleteCancel}
-                                className="text-white bg-gray-400 hover:bg-gray-500 rounded-full p-2 transition-colors"
+                                className="text-white bg-gray-400 hover:bg-gray-500 rounded-full p-2.5 transition-colors shadow-sm"
                                 title={t('cancel')}
                               >
                                 <FaTimes size={14} />
@@ -406,10 +450,10 @@ const Reviews = () => {
                           ) : (
                             <button
                               onClick={() => handleDeleteConfirm(review)}
-                              className="text-red-500 hover:bg-red-50 p-2 rounded-full transition-colors"
+                              className="text-red-500 hover:text-red-600 bg-red-50 hover:bg-red-100 p-2.5 rounded-full transition-colors shadow-sm"
                               title={t('delete_review')}
                             >
-                              <FaTrash size={16} />
+                              <FaTrash size={14} />
                             </button>
                           )}
                         </div>
