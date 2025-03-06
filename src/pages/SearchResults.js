@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { FaSearch, FaFilter, FaLightbulb,  FaSortDown } from 'react-icons/fa';
+import { FaSearch, FaFilter, FaLightbulb, FaSortDown, FaHeart, FaStar, FaUtensils, FaClock, FaMagic } from 'react-icons/fa';
 import { useLanguage } from '../context/LanguageContext';
 import { getRecipes, searchRecipesByIngredients } from '../services/recipeService';
 import RecipeCard from '../components/recipe/RecipeCard';
@@ -19,6 +19,7 @@ const SearchResults = () => {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [hasSuggestedRecipes, setHasSuggestedRecipes] = useState(false);
   const [sortOption, setSortOption] = useState('best_match'); // Default sort option
+  const [searchAnimation, setSearchAnimation] = useState(false);
   
   // Filter states
   const [filters, setFilters] = useState({
@@ -61,6 +62,8 @@ const SearchResults = () => {
   const performSearch = useCallback(async (ingredients) => {
     try {
       setLoading(true);
+      setSearchAnimation(true);
+      
       const ingredientsArray = ingredients.split(',').map(i => i.trim()).filter(Boolean);
       
       if (ingredientsArray.length === 0) {
@@ -95,11 +98,18 @@ const SearchResults = () => {
       } catch (storageError) {
         console.error('Error storing search results in sessionStorage:', storageError);
       }
+      
+      // Hide search animation after 1 second
+      setTimeout(() => {
+        setSearchAnimation(false);
+      }, 1000);
+      
     } catch (error) {
       console.error('Search error:', error);
       toast.error(t('search_error'));
       setRecipes([]);
       setTotalResults(0);
+      setSearchAnimation(false);
       
       navigate(`/search?ingredients=${encodeURIComponent(ingredients)}`);
     } finally {
@@ -273,47 +283,88 @@ const SearchResults = () => {
   const hasScores = recipes.some(recipe => recipe.similarityScore !== undefined);
   
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-rose-50 py-8">
+      {/* Cute floating elements */}
+      <div className="hidden md:block">
+        <div className="fixed top-20 left-10 animate-bounce-slow opacity-20 text-pink-400">
+          <FaUtensils size={30} />
+        </div>
+        <div className="fixed top-40 right-10 animate-pulse opacity-20 text-pink-400">
+          <FaHeart size={30} />
+        </div>
+        <div className="fixed bottom-20 left-20 animate-pulse opacity-20 text-pink-400">
+          <FaClock size={30} />
+        </div>
+        <div className="fixed bottom-60 right-20 animate-bounce-slow opacity-20 text-pink-400">
+          <FaStar size={30} />
+        </div>
+      </div>
+      
+      {/* Search animation overlay */}
+      {searchAnimation && (
+        <div className="fixed inset-0 bg-pink-500/20 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="text-center">
+            <FaMagic className="text-pink-500 text-5xl mx-auto animate-spin-slow mb-4" />
+            <p className="text-pink-600 font-medium text-xl">{t('finding_perfect_recipes')}</p>
+          </div>
+        </div>
+      )}
+      
       <div className="container mx-auto px-4">
+        {/* Page Title */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 font-cursive mb-2">
+            {t('recipe_search')}
+          </h1>
+          <p className="text-gray-600">{t('find_perfect_recipe')}</p>
+        </div>
+        
         {/* Search Bar */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div className="bg-white rounded-3xl shadow-lg p-6 mb-8 border border-pink-100">
           <form onSubmit={handleSearch} className="flex flex-col md:flex-row md:items-center gap-4">
             <div className="relative flex-grow">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FaSearch className="text-gray-400" />
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <FaSearch className="text-pink-300" />
               </div>
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary sm:text-sm"
+                className="block w-full pl-12 pr-4 py-3 border border-pink-200 rounded-full leading-5 bg-white placeholder-pink-300 focus:outline-none focus:placeholder-pink-300 focus:border-pink-400 focus:ring-1 focus:ring-pink-400 transition-all duration-300"
                 placeholder={t('ingredients_placeholder')}
               />
             </div>
-            <button
-              type="submit"
-              className="bg-primary text-white px-6 py-2 rounded-md hover:bg-primary-dark flex-shrink-0"
-            >
-              {t('search')}
-            </button>
-            <button
-              type="button"
-              onClick={toggleFilters}
-              className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 flex items-center space-x-2 flex-shrink-0 md:ml-2"
-            >
-              <FaFilter />
-              <span>{t('filters')}</span>
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="submit"
+                className="bg-gradient-to-r from-pink-400 to-rose-500 text-white px-6 py-3 rounded-full hover:from-pink-500 hover:to-rose-600 transition-all duration-300 shadow-md transform hover:scale-105 flex-shrink-0"
+              >
+                {t('search')}
+              </button>
+              <button
+                type="button"
+                onClick={toggleFilters}
+                className="bg-white text-pink-500 px-4 py-3 rounded-full hover:bg-pink-50 border border-pink-200 flex items-center space-x-2 flex-shrink-0 shadow-md transition-all duration-300 transform hover:scale-105"
+              >
+                <FaFilter />
+                <span>{t('filters')}</span>
+              </button>
+            </div>
           </form>
           
           {/* Filters Panel */}
           {filtersOpen && (
-            <div className="mt-6 p-4 border-t border-gray-200 animate-slide-up">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-semibold text-gray-700">{t('filter_recipes')}</h3>
+            <div className="mt-6 p-6 border-t border-pink-100 animate-slide-up bg-pink-50/50 rounded-2xl">
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center">
+                  <div className="bg-pink-100 p-2 rounded-full mr-3">
+                    <FaFilter className="text-pink-500" />
+                  </div>
+                  <h3 className="font-semibold text-gray-700 font-cursive text-xl">{t('filter_recipes')}</h3>
+                </div>
                 <button 
                   onClick={toggleFilters}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-gray-400 hover:text-gray-600 bg-white p-2 rounded-full"
                 >
                   <span className="sr-only">{t('close')}</span>
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -324,14 +375,14 @@ const SearchResults = () => {
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Sort By */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="bg-white p-4 rounded-xl shadow-sm">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     {t('sort_by')}
                   </label>
                   <select
                     value={filters.sortBy}
                     onChange={(e) => setFilters({...filters, sortBy: e.target.value})}
-                    className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md"
+                    className="block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-pink-400 focus:border-pink-400 sm:text-sm rounded-lg"
                   >
                     <option value="relevance">{t('relevance')}</option>
                     <option value="rating">{t('highest_rated')}</option>
@@ -340,14 +391,14 @@ const SearchResults = () => {
                 </div>
                 
                 {/* Duration */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="bg-white p-4 rounded-xl shadow-sm">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     {t('preparation_time')}
                   </label>
                   <select
                     value={filters.duration}
                     onChange={(e) => setFilters({...filters, duration: e.target.value})}
-                    className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md"
+                    className="block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-pink-400 focus:border-pink-400 sm:text-sm rounded-lg"
                   >
                     <option value="all">{t('all')}</option>
                     <option value="quick">{t('quick')} (&lt; 15 min)</option>
@@ -357,14 +408,14 @@ const SearchResults = () => {
                 </div>
                 
                 {/* Minimum Rating */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="bg-white p-4 rounded-xl shadow-sm">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     {t('minimum_rating')}
                   </label>
                   <select
                     value={filters.minRating}
                     onChange={(e) => setFilters({...filters, minRating: parseFloat(e.target.value)})}
-                    className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md"
+                    className="block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-pink-400 focus:border-pink-400 sm:text-sm rounded-lg"
                   >
                     <option value="0">{t('any_rating')}</option>
                     <option value="3">3+ {t('stars')}</option>
@@ -374,18 +425,18 @@ const SearchResults = () => {
                 </div>
               </div>
               
-              <div className="mt-6 flex justify-end space-x-3">
+              <div className="mt-8 flex justify-end space-x-3">
                 <button
                   type="button"
                   onClick={resetFilters}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  className="px-6 py-3 border border-pink-300 rounded-full text-pink-500 bg-white hover:bg-pink-50 transition-all duration-300"
                 >
                   {t('reset')}
                 </button>
                 <button
                   type="button"
                   onClick={applyFilters}
-                  className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
+                  className="px-6 py-3 bg-gradient-to-r from-pink-400 to-rose-500 text-white rounded-full hover:from-pink-500 hover:to-rose-600 transition-all duration-300 shadow-md"
                 >
                   {t('apply_filters')}
                 </button>
@@ -395,13 +446,14 @@ const SearchResults = () => {
         </div>
         
         {/* Results Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2 md:mb-0">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 bg-white p-4 rounded-2xl shadow-md border border-pink-100">
+          <h2 className="text-2xl font-bold text-gray-800 mb-2 md:mb-0 font-cursive flex items-center">
+            <FaHeart className="text-pink-400 mr-2" />
             {getSearchResultsText()}
-          </h1>
+          </h2>
           
           <div className="flex items-center space-x-2">
-            <span className="text-gray-600 mr-2">
+            <span className="text-gray-600 mr-2 bg-pink-100 px-3 py-1 rounded-full text-sm">
               {totalResults} {totalResults === 1 ? t('result_found') : t('results_found')}
             </span>
             
@@ -410,13 +462,13 @@ const SearchResults = () => {
               <select
                 value={sortOption}
                 onChange={(e) => handleSortOptionChange(e.target.value)}
-                className="appearance-none bg-white border border-gray-300 py-2 pl-3 pr-10 rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary"
+                className="appearance-none bg-white border border-pink-200 py-2 pl-3 pr-10 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-pink-300 shadow-sm"
               >
                 <option value="best_match">{t('best_match')}</option>
                 <option value="highest_rated">{t('highest_rated')}</option>
                 <option value="newest">{t('newest')}</option>
               </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-pink-500">
                 <FaSortDown />
               </div>
             </div>
@@ -424,21 +476,24 @@ const SearchResults = () => {
         </div>
         
         {/* Results Grid */}
-        {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-primary"></div>
+        {loading && !searchAnimation ? (
+          <div className="flex justify-center items-center py-16">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-pink-500"></div>
           </div>
         ) : recipes.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-lg shadow-md">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">{t('no_results')}</h2>
-            <p className="text-gray-600 mb-6">{t('no_results_message')}</p>
+          <div className="text-center py-16 bg-white rounded-3xl shadow-md border border-pink-100">
+            <div className="animate-bounce-slow mb-4">
+              <FaUtensils className="text-pink-400 text-4xl mx-auto" />
+            </div>
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4 font-cursive">{t('no_results')}</h2>
+            <p className="text-gray-600 mb-8 max-w-md mx-auto">{t('no_results_message')}</p>
             <button
               onClick={() => {
                 setSearchTerm('');
                 fetchLatestRecipes();
                 navigate('/search');
               }}
-              className="bg-primary text-white px-6 py-2 rounded-md hover:bg-primary-dark"
+              className="bg-gradient-to-r from-pink-400 to-rose-500 text-white px-8 py-3 rounded-full hover:from-pink-500 hover:to-rose-600 transition-all duration-300 shadow-md transform hover:scale-105"
             >
               {t('browse_all_recipes')}
             </button>
@@ -447,19 +502,25 @@ const SearchResults = () => {
           <>
             {/* Exact match recipes */}
             {exactMatchRecipes.length > 0 && (
-              <div className="mb-8">
+              <div className="mb-12">
                 {hasSuggestedRecipes && (
-                  <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                    {t('exact_matches')}
-                  </h2>
+                  <div className="flex items-center mb-6">
+                    <div className="bg-pink-100 p-3 rounded-full mr-3">
+                      <FaCheckCircle className="text-pink-500" />
+                    </div>
+                    <h2 className="text-2xl font-semibold text-gray-800 font-cursive">
+                      {t('exact_matches')}
+                    </h2>
+                  </div>
                 )}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {exactMatchRecipes.map(recipe => (
-                    <RecipeCard 
-                      key={recipe._id} 
-                      recipe={recipe} 
-                      showSimilarityScore={hasScores}
-                    />
+                    <div key={recipe._id} className="transform hover:scale-105 transition-transform duration-300">
+                      <RecipeCard 
+                        recipe={recipe} 
+                        showSimilarityScore={hasScores}
+                      />
+                    </div>
                   ))}
                 </div>
               </div>
@@ -467,42 +528,46 @@ const SearchResults = () => {
             
             {/* Suggested recipes */}
             {suggestedRecipes.length > 0 && (
-              <div className="mt-12">
-                <div className="flex items-center mb-4">
-                  <FaLightbulb className="text-yellow-500 mr-2" />
-                  <h2 className="text-xl font-semibold text-gray-800">
+              <div className="mt-16 bg-gradient-to-b from-white to-rose-100 py-12 px-8 rounded-3xl shadow-lg">
+                <div className="flex items-center mb-6">
+                  <div className="text-yellow-500 bg-yellow-100 p-3 rounded-full mr-3">
+                    <FaLightbulb />
+                  </div>
+                  <h2 className="text-2xl font-semibold text-gray-800 font-cursive">
                     {t('suggested_recipes')}
                   </h2>
                 </div>
-                <p className="text-gray-600 mb-6">
+                <p className="text-gray-600 mb-8 max-w-3xl">
                   {t('suggested_recipes_description')}
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {suggestedRecipes.map(recipe => (
-                    <RecipeCard 
-                      key={recipe._id} 
-                      recipe={recipe}
-                    />
+                    <div key={recipe._id} className="transform hover:scale-105 transition-transform duration-300">
+                      <RecipeCard recipe={recipe} />
+                    </div>
                   ))}
                 </div>
               </div>
             )}
             
-            {/* Pagination - simplified version */}
+            {/* Pagination - cute version */}
             {totalResults > 12 && (
-              <div className="mt-12 flex justify-center">
-                <nav className="inline-flex rounded-md shadow">
+              <div className="mt-16 flex justify-center">
+                <nav className="inline-flex rounded-full shadow-md overflow-hidden">
                   <button
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
-                    className="relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="relative inline-flex items-center px-6 py-3 border-r border-pink-200 bg-white text-sm font-medium text-pink-500 hover:bg-pink-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300"
                   >
                     {t('previous')}
                   </button>
+                  <div className="bg-pink-100 px-4 flex items-center text-pink-600 font-medium">
+                    {currentPage} / {Math.ceil(totalResults / 12)}
+                  </div>
                   <button
                     onClick={() => setCurrentPage(prev => prev + 1)}
                     disabled={currentPage * 12 >= totalResults}
-                    className="relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="relative inline-flex items-center px-6 py-3 border-l border-pink-200 bg-white text-sm font-medium text-pink-500 hover:bg-pink-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300"
                   >
                     {t('next')}
                   </button>
@@ -512,8 +577,49 @@ const SearchResults = () => {
           </>
         )}
       </div>
+      
+      {/* Add custom animation keyframes */}
+      <style jsx="true">{`
+        @keyframes bounce-slow {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        
+        .animate-bounce-slow {
+          animation: bounce-slow 3s infinite;
+        }
+        
+        .animate-spin-slow {
+          animation: spin-slow 3s linear infinite;
+        }
+        
+        .font-cursive {
+          font-family: 'Comic Sans MS', cursive, sans-serif;
+        }
+        
+        @keyframes slide-up {
+          from { transform: translateY(10px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .animate-slide-up {
+          animation: slide-up 0.3s ease-out forwards;
+        }
+      `}</style>
     </div>
   );
 };
+
+// Add FaCheckCircle to imports at the top
+const FaCheckCircle = (props) => (
+  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 512 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg" {...props}>
+    <path d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z"></path>
+  </svg>
+);
 
 export default SearchResults;
