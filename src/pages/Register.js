@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { FaUser, FaEnvelope, FaLock, FaUtensils, FaHeart, FaCookieBite, FaStar, FaSparkles } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaLock, FaUtensils, FaHeart, FaCookieBite, FaStar } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 
