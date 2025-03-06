@@ -577,40 +577,6 @@ const SearchResults = () => {
           </>
         )}
       </div>
-      
-      {/* Add custom animation keyframes */}
-      <style jsx="true">{`
-        @keyframes bounce-slow {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
-        }
-        
-        @keyframes spin-slow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        
-        .animate-bounce-slow {
-          animation: bounce-slow 3s infinite;
-        }
-        
-        .animate-spin-slow {
-          animation: spin-slow 3s linear infinite;
-        }
-        
-        .font-cursive {
-          font-family: 'Comic Sans MS', cursive, sans-serif;
-        }
-        
-        @keyframes slide-up {
-          from { transform: translateY(10px); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
-        }
-        
-        .animate-slide-up {
-          animation: slide-up 0.3s ease-out forwards;
-        }
-      `}</style>
     </div>
   );
 };

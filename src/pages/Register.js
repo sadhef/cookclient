@@ -261,31 +261,6 @@ const Register = () => {
           </div>
         </div>
       </div>
-      
-      {/* Add custom animation keyframes */}
-      <style jsx="true">{`
-        @keyframes bounce-slow {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
-        }
-        
-        @keyframes float {
-          0%, 100% { transform: translateY(0) scale(1); }
-          50% { transform: translateY(-15px) scale(1.1); }
-        }
-        
-        .animate-bounce-slow {
-          animation: bounce-slow 3s infinite;
-        }
-        
-        .animate-float {
-          animation: float 2s ease-in-out infinite;
-        }
-        
-        .font-cursive {
-          font-family: 'Comic Sans MS', cursive, sans-serif;
-        }
-      `}</style>
     </div>
   );
 };

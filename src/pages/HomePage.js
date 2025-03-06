@@ -355,32 +355,6 @@ const HomePage = () => {
           </button>
         </div>
       </div>
-      
-      {/* Add custom animation keyframes */}
-      <style jsx="true">{`
-        @keyframes bounce-slow {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
-        }
-        
-        @keyframes float-up-and-fade {
-          0% { transform: scale(0.7); opacity: 0; }
-          50% { transform: scale(1.2); opacity: 1; }
-          100% { transform: translateY(-100px) scale(0.5); opacity: 0; }
-        }
-        
-        .animate-bounce-slow {
-          animation: bounce-slow 3s infinite;
-        }
-        
-        .animate-float-up-and-fade {
-          animation: float-up-and-fade 1.5s forwards;
-        }
-        
-        .font-cursive {
-          font-family: 'Comic Sans MS', cursive, sans-serif;
-        }
-      `}</style>
     </div>
   );
 };
