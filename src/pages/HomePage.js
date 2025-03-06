@@ -117,7 +117,7 @@ const HomePage = () => {
     }
   };
   
-  // Handle asking Cookie 🎀 for suggestions
+  // Handle asking Cookie for suggestions
   const handleAskCookie = () => {
     if (!ingredients.trim()) {
       toast.info(t('enter_ingredients'));
@@ -132,7 +132,7 @@ const HomePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-100">
       {/* Hero Section with Video Background */}
       <div className="relative text-white overflow-hidden">
         {/* Video Background */}
@@ -143,14 +143,14 @@ const HomePage = () => {
             muted 
             playsInline
             className="w-full h-full object-cover"
-            style={{ filter: 'brightness(0.7)' }}
+            style={{ filter: 'grayscale(100%) brightness(0.5)' }}
           >
             <source src="/IMG_9234.MOV" type="video/mp4" />
             {/* Fallback background if video fails to load */}
-            <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary-dark"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-900 to-black"></div>
           </video>
           {/* Overlay to ensure text readability */}
-          <div className="absolute inset-0 bg-black opacity-50"></div>
+          <div className="absolute inset-0 bg-black opacity-60"></div>
         </div>
 
         {/* Content */}
@@ -174,21 +174,21 @@ const HomePage = () => {
                     type="text"
                     value={ingredients}
                     onChange={(e) => setIngredients(e.target.value)}
-                    className="block w-full py-3 pl-10 pr-3 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                    className="block w-full py-3 pl-10 pr-3 text-gray-800 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-gray-800 focus:ring-1 focus:ring-gray-800"
                     placeholder={t('ingredients_placeholder')}
                   />
                 </div>
                 <div className="flex gap-2">
                   <button
                     type="submit"
-                    className="py-3 px-6 bg-white text-primary font-medium rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                    className="py-3 px-6 bg-white text-gray-900 font-medium rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800"
                   >
                     {t('find_recipes')}
                   </button>
                   <button
                     type="button"
                     onClick={handleAskCookie}
-                    className="py-3 px-4 bg-white/80 backdrop-blur-sm text-primary-dark font-medium rounded-lg hover:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary flex items-center"
+                    className="py-3 px-4 bg-white/90 backdrop-blur-sm text-gray-900 font-medium rounded-lg hover:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800 flex items-center"
                   >
                     <FaRobot className="mr-2" />
                     {t('ask_Cookie')}
@@ -235,17 +235,17 @@ const HomePage = () => {
       
       {/* Top Rated Recipes */}
       <div className="container mx-auto px-4 py-12">
-        <h2 className="text-3xl font-bold text-gray-800 mb-8">
+        <h2 className="text-3xl font-bold text-gray-900 mb-8">
           {t('top_rated_recipes')}
         </h2>
         
         {loading ? (
           <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-primary"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-gray-800"></div>
           </div>
         ) : topRatedRecipes.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-gray-500">{t('no_recipes_found')}</p>
+            <p className="text-gray-600">{t('no_recipes_found')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -257,18 +257,18 @@ const HomePage = () => {
       </div>
       
       {/* Latest Recipes */}
-      <div className="container mx-auto px-4 py-12">
-        <h2 className="text-3xl font-bold text-gray-800 mb-8">
+      <div className="container mx-auto px-4 py-12 bg-gray-200">
+        <h2 className="text-3xl font-bold text-gray-900 mb-8">
           {t('latest_recipes')}
         </h2>
         
         {loading ? (
           <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-primary"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-gray-800"></div>
           </div>
         ) : latestRecipes.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-gray-500">{t('no_recipes_found')}</p>
+            <p className="text-gray-600">{t('no_recipes_found')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
