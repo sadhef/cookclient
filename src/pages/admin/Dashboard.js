@@ -8,7 +8,7 @@ import { getRecipes } from '../../services/recipeService';
 import AdminSidebar from './AdminSidebar';
 import { toast } from 'react-toastify';
 
-const StatCard = ({ title, value, icon, color, gradient, trend }) => {
+const StatCard = ({ title, value, icon, gradient, trend }) => {
   return (
     <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-pink-100 transform hover:scale-102 transition-all duration-300">
       <div className="p-6">
@@ -298,7 +298,7 @@ const Dashboard = () => {
             <div className="bg-pink-100 p-3 rounded-full mr-3">
               <FaChartPie className="text-pink-500" size={20} />
             </div>
-            <h1 className="text-2xl font-bold text-gray-800 font-cursive">{t('admin_dashboard')}</h1>
+            <h1 className="text-2xl font-bold text-gray-800">{t('admin_dashboard')}</h1>
           </div>
         </div>
         
@@ -338,7 +338,7 @@ const Dashboard = () => {
                   <div className="bg-pink-100 p-2 rounded-full mr-2">
                     <FaCrown className="text-pink-500" size={16} />
                   </div>
-                  <h2 className="font-bold text-gray-800 font-cursive">{t('top_rated_recipes')}</h2>
+                  <h2 className="font-bold text-gray-800">{t('top_rated_recipes')}</h2>
                 </div>
                 <Link to="/admin/recipes" className="text-pink-500 text-sm font-medium hover:underline flex items-center">
                   {t('view_all')}
@@ -373,7 +373,7 @@ const Dashboard = () => {
                   <div className="bg-pink-100 p-2 rounded-full mr-2">
                     <FaUsers className="text-pink-500" size={16} />
                   </div>
-                  <h2 className="font-bold text-gray-800 font-cursive">{t('recent_users')}</h2>
+                  <h2 className="font-bold text-gray-800">{t('recent_users')}</h2>
                 </div>
                 <Link to="/admin/users" className="text-pink-500 text-sm font-medium hover:underline flex items-center">
                   {t('view_all')}
@@ -409,7 +409,7 @@ const Dashboard = () => {
                 <div className="bg-pink-100 p-2 rounded-full mr-2">
                   <FaCommentAlt className="text-pink-500" size={16} />
                 </div>
-                <h2 className="font-bold text-gray-800 font-cursive">{t('recent_reviews')}</h2>
+                <h2 className="font-bold text-gray-800">{t('recent_reviews')}</h2>
               </div>
               <Link to="/admin/reviews" className="text-pink-500 text-sm font-medium hover:underline flex items-center">
                 {t('view_all')}

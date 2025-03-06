@@ -1,6 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaChartPie, FaUsers, FaUtensils, FaStar, FaSignOutAlt, FaBars, FaTimes, FaAngleRight, FaChevronDown, FaUser } from 'react-icons/fa';
+import { 
+  FaChartPie, 
+  FaUsers, 
+  FaUtensils, 
+  FaStar, 
+  FaSignOutAlt, 
+  FaBars, 
+  FaTimes, 
+  FaAngleRight, 
+  FaChevronDown, 
+  FaUser,
+  FaHeart
+} from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -73,10 +85,10 @@ const AdminSidebar = () => {
     return (
       <Link
         to={item.path}
-        className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
+        className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${
           isActive 
-            ? 'bg-primary text-white' 
-            : 'text-gray-700 hover:bg-gray-100'
+            ? 'bg-gradient-to-r from-pink-400 to-rose-500 text-white shadow-md' 
+            : 'text-gray-700 hover:bg-pink-50'
         }`}
         onClick={onClick}
       >
@@ -90,8 +102,8 @@ const AdminSidebar = () => {
   return (
     <>
       {/* Top navigation for all screen sizes */}
-      <div className="fixed top-0 left-0 right-0 bg-white shadow-sm z-30 px-4 py-3 flex items-center justify-between">
-        <Link to="/" className="flex items-center space-x-2 text-primary font-bold text-2xl">
+      <div className="fixed top-0 left-0 right-0 bg-white shadow-sm z-30 px-4 py-3 flex items-center justify-between border-b border-pink-100">
+        <Link to="/" className="flex items-center space-x-2 text-pink-500 font-bold text-2xl">
           <FaUtensils />
           <span>COokiFy</span>
         </Link>
@@ -100,9 +112,9 @@ const AdminSidebar = () => {
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-pink-50 transition-colors"
           >
-            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+            <div className="w-9 h-9 rounded-full bg-pink-100 flex items-center justify-center overflow-hidden border-2 border-pink-200">
               {user?.avatar ? (
                 <img 
                   src={user.avatar} 
@@ -110,7 +122,7 @@ const AdminSidebar = () => {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <FaUser className="text-gray-500" />
+                <FaUser className="text-pink-500" />
               )}
             </div>
             <div className="hidden md:block">
@@ -121,10 +133,10 @@ const AdminSidebar = () => {
           
           {/* Dropdown menu */}
           {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg overflow-hidden z-50">
-              <div className="p-4 border-b border-gray-100">
+            <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg overflow-hidden z-50 border border-pink-100">
+              <div className="p-4 border-b border-pink-100">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                  <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center overflow-hidden border-2 border-pink-200">
                     {user?.avatar ? (
                       <img 
                         src={user.avatar} 
@@ -132,12 +144,12 @@ const AdminSidebar = () => {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <span className="text-lg font-semibold">{user?.name?.charAt(0) || 'A'}</span>
+                      <span className="text-lg font-semibold text-pink-500">{user?.name?.charAt(0) || 'A'}</span>
                     )}
                   </div>
                   <div>
                     <p className="font-medium text-gray-800">{user?.name || 'Admin'}</p>
-                    <p className="text-xs text-gray-500">{t('admin')}</p>
+                    <p className="text-xs text-pink-500">{t('admin')}</p>
                   </div>
                 </div>
               </div>
@@ -149,13 +161,13 @@ const AdminSidebar = () => {
                       <NavLink item={item} onClick={() => setIsDropdownOpen(false)} />
                     </li>
                   ))}
-                  <li className="border-t border-gray-100 mt-2 pt-2">
+                  <li className="border-t border-pink-100 mt-2 pt-2">
                     <button
                       onClick={() => {
                         setIsDropdownOpen(false);
                         logout();
                       }}
-                      className="flex items-center space-x-3 w-full px-4 py-3 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
+                      className="flex items-center space-x-3 w-full px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 transition-colors"
                     >
                       <FaSignOutAlt />
                       <span className="font-medium">{t('logout')}</span>
@@ -170,7 +182,7 @@ const AdminSidebar = () => {
         {/* Mobile menu button */}
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="md:hidden text-gray-500 p-2 focus:outline-none"
+          className="md:hidden text-pink-500 p-2 focus:outline-none"
           aria-label="Toggle menu"
         >
           {isMobileMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
@@ -180,7 +192,7 @@ const AdminSidebar = () => {
       {/* Mobile menu overlay */}
       {isMobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+          className="fixed inset-0 bg-pink-500 bg-opacity-20 backdrop-blur-sm z-30 md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
@@ -196,13 +208,13 @@ const AdminSidebar = () => {
                 <NavLink item={item} onClick={() => setIsMobileMenuOpen(false)} />
               </li>
             ))}
-            <li className="border-t border-gray-100 mt-2 pt-2">
+            <li className="border-t border-pink-100 mt-2 pt-2">
               <button
                 onClick={() => {
                   setIsMobileMenuOpen(false);
                   logout();
                 }}
-                className="flex items-center space-x-3 w-full px-4 py-3 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
+                className="flex items-center space-x-3 w-full px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 transition-colors"
               >
                 <FaSignOutAlt />
                 <span className="font-medium">{t('logout')}</span>
@@ -214,6 +226,11 @@ const AdminSidebar = () => {
       
       {/* Extra space at the top to account for fixed navbar */}
       <div className="pt-14"></div>
+
+      {/* Floating decoration */}
+      <div className="fixed bottom-5 right-5 text-pink-200 animate-pulse-slow hidden md:block">
+        <FaHeart size={24} />
+      </div>
     </>
   );
 };
