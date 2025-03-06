@@ -22,54 +22,7 @@ const HomePage = () => {
       try {
         setLoading(true);
         
-        // Create fallback recipes in case API fails
-        const fallbackRecipes = [
-          {
-            _id: 'fallback1',
-            title: 'Italian Pasta',
-            description: 'A delicious homemade pasta with rich tomato sauce',
-            image: '/default-recipe.jpg', // Using relative path
-            totalTime: '30 minutes',
-            averageRating: 4.5,
-            ratingCount: 10,
-            nutrition: {
-              calories: { value: 450 },
-              protein: { value: 15 },
-              carbs: { value: 65 }
-            }
-          },
-          {
-            _id: 'fallback2',
-            title: 'Garden Salad',
-            description: 'Fresh vegetables with a zesty dressing',
-            image: '/default-recipe.jpg',
-            totalTime: '15 minutes',
-            averageRating: 4.2,
-            ratingCount: 8,
-            nutrition: {
-              calories: { value: 220 },
-              protein: { value: 5 },
-              carbs: { value: 20 }
-            }
-          },
-          {
-            _id: 'fallback3',
-            title: 'Chocolate Cake',
-            description: 'Rich and moist chocolate cake for dessert',
-            image: '/default-recipe.jpg',
-            totalTime: '45 minutes',
-            averageRating: 4.8,
-            ratingCount: 15,
-            nutrition: {
-              calories: { value: 380 },
-              protein: { value: 6 },
-              carbs: { value: 48 }
-            }
-          }
-        ];
-        
-        // Fetch top rated recipes with timeout protection
-        let topRated = [];
+        // Fetch top rated recipes
         try {
           // Set a timeout for this specific fetch
           const topRatedPromise = getRecipes({
@@ -86,16 +39,14 @@ const HomePage = () => {
           // Handle different response formats
           if (topRatedResponse && topRatedResponse.data) {
             const topRatedData = topRatedResponse.data.data || topRatedResponse.data;
-            topRated = Array.isArray(topRatedData) ? topRatedData : [];
+            setTopRatedRecipes(Array.isArray(topRatedData) ? topRatedData : []);
           }
         } catch (error) {
           console.error('Error fetching top rated recipes:', error);
-          topRated = fallbackRecipes;
+          setTopRatedRecipes([]);
         }
-        setTopRatedRecipes(topRated.length > 0 ? topRated : fallbackRecipes);
         
-        // Fetch latest recipes with timeout protection
-        let latest = [];
+        // Fetch latest recipes
         try {
           // Set a timeout for this specific fetch
           const latestPromise = getRecipes({
@@ -112,62 +63,16 @@ const HomePage = () => {
           // Handle different response formats
           if (latestResponse && latestResponse.data) {
             const latestData = latestResponse.data.data || latestResponse.data;
-            latest = Array.isArray(latestData) ? latestData : [];
+            setLatestRecipes(Array.isArray(latestData) ? latestData : []);
           }
         } catch (error) {
           console.error('Error fetching latest recipes:', error);
-          latest = fallbackRecipes;
+          setLatestRecipes([]);
         }
-        setLatestRecipes(latest.length > 0 ? latest : fallbackRecipes);
       } catch (error) {
         console.error('Failed to fetch recipes:', error);
-        // Define fallback recipes again here to avoid the ESLint error
-        const fallbackRecipes = [
-          {
-            _id: 'fallback1',
-            title: 'Italian Pasta',
-            description: 'A delicious homemade pasta with rich tomato sauce',
-            image: '/default-recipe.jpg',
-            totalTime: '30 minutes',
-            averageRating: 4.5,
-            ratingCount: 10,
-            nutrition: {
-              calories: { value: 450 },
-              protein: { value: 15 },
-              carbs: { value: 65 }
-            }
-          },
-          {
-            _id: 'fallback2',
-            title: 'Garden Salad',
-            description: 'Fresh vegetables with a zesty dressing',
-            image: '/default-recipe.jpg',
-            totalTime: '15 minutes',
-            averageRating: 4.2,
-            ratingCount: 8,
-            nutrition: {
-              calories: { value: 220 },
-              protein: { value: 5 },
-              carbs: { value: 20 }
-            }
-          },
-          {
-            _id: 'fallback3',
-            title: 'Chocolate Cake',
-            description: 'Rich and moist chocolate cake for dessert',
-            image: '/default-recipe.jpg',
-            totalTime: '45 minutes',
-            averageRating: 4.8,
-            ratingCount: 15,
-            nutrition: {
-              calories: { value: 380 },
-              protein: { value: 6 },
-              carbs: { value: 48 }
-            }
-          }
-        ];
-        setTopRatedRecipes(fallbackRecipes);
-        setLatestRecipes(fallbackRecipes);
+        setTopRatedRecipes([]);
+        setLatestRecipes([]);
       } finally {
         setLoading(false);
       }
