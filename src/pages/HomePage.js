@@ -334,29 +334,8 @@ const HomePage = () => {
           )}
         </div>
       </div>
-      
-      {/* Footer call to action */}
-      <div className="bg-gradient-to-r from-pink-400 to-rose-500 py-12 text-white text-center">
-        <div className="container mx-auto px-4">
-          <div className="mb-6 animate-pulse">
-            <FaHeart className="text-4xl mx-auto" />
-          </div>
-          <h3 className="text-2xl font-bold mb-4 font-cursive">
-            {t('ready_to_cook')}
-          </h3>
-          <p className="mb-8 max-w-2xl mx-auto">
-            {t('start_exploring')}
-          </p>
-          <button 
-            onClick={() => navigate('/search')} 
-            className="bg-white text-pink-500 px-8 py-3 rounded-full font-medium hover:bg-pink-100 transition-colors shadow-md"
-          >
-            {t('explore_all_recipes')}
-          </button>
-        </div>
-      </div>
     </div>
   );
-};
+}
 
 export default HomePage;
