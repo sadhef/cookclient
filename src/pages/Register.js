@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { FaUser, FaEnvelope, FaLock, FaUtensils, FaHeart, FaCookieBite, FaStar } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaLock, FaUtensils, FaHeart, FaCookieBite, FaStar, FaMagic } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -79,7 +79,7 @@ const Register = () => {
         <div className="fixed inset-0 bg-pink-500/20 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="text-center">
             <div className="animate-float">
-              <FaSparkles className="text-pink-500 text-5xl mx-auto" />
+            <FaMagic className="text-pink-500 text-5xl mx-auto" />
             </div>
             <p className="text-pink-600 font-medium text-xl mt-4">{t('creating_account')}...</p>
           </div>
