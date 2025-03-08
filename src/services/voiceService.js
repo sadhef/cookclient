@@ -98,8 +98,26 @@ const createSpeechRecognition = (language = 'en-US', onResult, onEnd) => {
   return recognition;
 };
 
-// Text-to-speech function with error handling
-const speak = (text, language = 'en') => {
+// Voice preferences - can be customized based on user preferences
+const voicePreferences = {
+  en: {
+    // For Jarvis-like experience, prefer British male voice
+    preferredGender: 'male',
+    // Prioritize British voices like those in Iron Man's J.A.R.V.I.S.
+    preferredVoiceNames: ['Google UK English Male', 'Microsoft George', 'Daniel', 'British Male']
+  },
+  ml: {
+    preferredGender: 'male',
+    preferredVoiceNames: []
+  },
+  ta: {
+    preferredGender: 'male',
+    preferredVoiceNames: []
+  }
+};
+
+// Text-to-speech function with enhanced voice selection for Jarvis-like effect
+const speak = (text, language = 'en', voiceType = 'default') => {
   if (!window.speechSynthesis) {
     console.warn('Speech synthesis not supported');
     return false;
@@ -111,32 +129,111 @@ const speak = (text, language = 'en') => {
     
     const utterance = new SpeechSynthesisUtterance(text);
     const langCode = languageCodes[language] || 'en-US';
-    utterance.lang = langCode;
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
-    utterance.volume = 1.0;
+    utterance.lang = language === 'en' ? 'en-GB' : langCode; // Prefer British English for Jarvis
     
-    console.log(`Speaking in language: ${language} (${langCode})`, text);
+    // Default parameters
+    utterance.rate = 0.9;    // Slightly slower than default
+    utterance.pitch = 0.9;   // Slightly lower pitch
+    utterance.volume = 1.0;  // Full volume
     
-    // Try to find a voice matching the language
+    console.log(`Speaking in language: ${language} (${utterance.lang})`, text);
+    
+    // Enhanced voice selection logic
     try {
-      const voices = window.speechSynthesis.getVoices();
-      if (voices && voices.length > 0) {
-        const languageVoices = voices.filter(voice => voice.lang.startsWith(langCode.split('-')[0]));
-        
-        if (languageVoices.length > 0) {
-          utterance.voice = languageVoices[0];
-          console.log(`Using voice: ${utterance.voice.name} (${utterance.voice.lang})`);
-        } else {
-          console.warn(`No matching voice found for ${langCode}, using default`);
-        }
+      // Force voices to load if needed
+      if (window.speechSynthesis.getVoices().length === 0) {
+        // Some browsers need a manual trigger
+        window.speechSynthesis.getVoices();
       }
+      
+      // Get voices with a small delay to ensure they're loaded
+      setTimeout(() => {
+        const voices = window.speechSynthesis.getVoices();
+        
+        if (voices && voices.length > 0) {
+          console.log(`Available voices: ${voices.length}`);
+          
+          // For debugging: log all available voices
+          voices.forEach((voice, i) => {
+            console.log(`Voice ${i}: ${voice.name} (${voice.lang}) - ${voice.localService ? 'local' : 'remote'}`);
+          });
+          
+          // For Jarvis, prioritize British English voices
+          let targetLang = language === 'en' ? 'en-GB' : langCode;
+          let languageVoices = voices.filter(voice => 
+            voice.lang.startsWith(targetLang.split('-')[0])
+          );
+          
+          // If no British voices found for English, fall back to any English
+          if (language === 'en' && languageVoices.length === 0) {
+            languageVoices = voices.filter(voice => 
+              voice.lang.startsWith('en')
+            );
+          }
+          
+          if (languageVoices.length > 0) {
+            // Get preferences for this language
+            const prefs = voicePreferences[language] || voicePreferences.en;
+            
+            // Try to find a voice by preferred name first
+            if (prefs.preferredVoiceNames && prefs.preferredVoiceNames.length > 0) {
+              for (const name of prefs.preferredVoiceNames) {
+                const matchedVoice = languageVoices.find(v => 
+                  v.name.includes(name) || v.voiceURI.includes(name)
+                );
+                
+                if (matchedVoice) {
+                  utterance.voice = matchedVoice;
+                  console.log(`Using Jarvis-like voice: ${matchedVoice.name}`);
+                  break;
+                }
+              }
+            }
+            
+            // If no preferred voice found, try by gender for male voice
+            if (!utterance.voice && prefs.preferredGender === 'male') {
+              const maleVoices = languageVoices.filter(voice => {
+                // Try to guess gender from voice name
+                const voiceName = voice.name.toLowerCase();
+                return voiceName.includes('male') || 
+                      voiceName.includes('david') || 
+                      voiceName.includes('george') || 
+                      voiceName.includes('daniel') || 
+                      voiceName.includes('thomas');
+              });
+              
+              if (maleVoices.length > 0) {
+                utterance.voice = maleVoices[0];
+                console.log(`Using male voice for Jarvis: ${utterance.voice.name}`);
+              }
+            }
+            
+            // If still no voice, use any language-matching voice
+            if (!utterance.voice) {
+              utterance.voice = languageVoices[0];
+              console.log(`Using default language voice: ${utterance.voice.name}`);
+            }
+          } else {
+            console.warn(`No matching voice found for ${langCode}, using default`);
+          }
+        }
+        
+        // J.A.R.V.I.S. specific voice tuning (especially for English)
+        if (language === 'en' || voiceType === 'jarvis') {
+          utterance.pitch = 0.85;  // Slightly lower pitch for authority
+          utterance.rate = 0.9;    // Slightly slower for clarity
+        }
+        
+        window.speechSynthesis.speak(utterance);
+      }, 100); // Small delay to ensure voices are loaded
+      
+      return true;
     } catch (e) {
       console.warn('Error selecting voice:', e);
+      // Fallback to basic speech
+      window.speechSynthesis.speak(utterance);
+      return true;
     }
-    
-    window.speechSynthesis.speak(utterance);
-    return true;
   } catch (error) {
     console.error('Error using speech synthesis:', error);
     return false;
@@ -281,7 +378,9 @@ export const useVoiceControl = (recipeData) => {
     
     console.log(`Response (${currentLanguage}):`, response);
     setVoiceResponse(response);
-    speak(response, currentLanguage);
+    
+    // Use 'jarvis' voice type for all responses
+    speak(response, currentLanguage, 'jarvis');
     
     // Reset processing flag with delay
     setTimeout(() => {
@@ -315,10 +414,11 @@ export const useVoiceControl = (recipeData) => {
     }
     
     try {
-      // First, speak the Jarvis greeting
-      const jarvisGreeting = "Hello Jarvis here, ready for your service as audio commando";
+      // First, speak the J.A.R.V.I.S. style greeting
+      const jarvisGreeting = "Hello Sir. J.A.R.V.I.S. here, ready for your service as audio commando.";
       setVoiceResponse(jarvisGreeting);
-      speak(jarvisGreeting, currentLanguage);
+      // Use 'jarvis' voice type for the greeting
+      speak(jarvisGreeting, currentLanguage, 'jarvis');
       
       // Wait a moment before starting the actual recognition
       setTimeout(() => {
@@ -343,7 +443,7 @@ export const useVoiceControl = (recipeData) => {
         recognition.start();
         setIsListening(true);
         setVoiceResponse(t('listening'));
-      }, 2000); // Wait 2 seconds after the greeting before starting to listen
+      }, 2500); // Wait 2.5 seconds after the greeting before starting to listen
     } catch (error) {
       console.error('Error starting voice control:', error);
       setVoiceResponse(t('voice_control_error'));
