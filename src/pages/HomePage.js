@@ -163,9 +163,9 @@ const HomePage = () => {
         </div>
       )}
 
-      {/* Hero Section with Video Background */}
-      <div className="relative text-white overflow-hidden rounded-b-[50px] shadow-lg">
-        {/* Video Background */}
+      {/* Hero Section with Professional Video Background */}
+      <div className="relative text-white overflow-hidden rounded-b-[50px] shadow-xl">
+        {/* Video Background with enhanced presentation */}
         <div className="absolute inset-0 w-full h-full z-0">
           <video 
             autoPlay 
@@ -173,14 +173,20 @@ const HomePage = () => {
             muted 
             playsInline
             className="w-full h-full object-cover"
-            style={{ filter: 'brightness(0.7)' }}
+            style={{ 
+              filter: 'brightness(0.65) contrast(1.1) saturate(1.2)',
+              transformOrigin: 'center center',
+              transform: 'scale(1.02)' // Subtle zoom to hide any potential edge artifacts
+            }}
           >
             <source src="/IMG_9234.MOV" type="video/mp4" />
             {/* Fallback background if video fails to load */}
-            <div className="absolute inset-0 bg-gradient-to-r from-gray-600 to-gray-800"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-800 to-gray-900"></div>
           </video>
-          {/* Overlay to ensure text readability */}
-          <div className="absolute inset-0 bg-black/40"></div>
+          {/* Professional gradient overlay for better text visibility and premium feel */}
+          <div className="absolute inset-0 bg-gradient-to-br from-black/50 via-black/40 to-black/60"></div>
+          {/* Subtle vignette effect for more professional look */}
+          <div className="absolute inset-0 shadow-[inset_0_0_100px_rgba(0,0,0,0.6)]"></div>
         </div>
 
         {/* Content */}
