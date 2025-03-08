@@ -14,8 +14,7 @@ const ChatBot = () => {
     inputValue, 
     setInputValue, 
     sendMessage,
-    clearChat,
-    addMessage
+    clearChat
   } = useChat();
   const { t } = useLanguage();
   const messagesEndRef = useRef(null);
@@ -36,59 +35,6 @@ const ChatBot = () => {
       }, 300);
     }
   }, [isOpen]);
-
-  // Send welcome messages sequence when chat is opened
-  useEffect(() => {
-    if (isOpen) {
-      // First sequential message after 2 seconds
-      const timer1 = setTimeout(() => {
-        addMessage({
-          id: Date.now() + 1,
-          role: 'assistant',
-          content: t('chatbot_welcome_msg1'),
-          timestamp: new Date()
-        });
-        
-        // Second sequential message after 4 seconds (2 seconds after the first)
-        const timer2 = setTimeout(() => {
-          addMessage({
-            id: Date.now() + 2,
-            role: 'assistant',
-            content: t('chatbot_welcome_msg2'),
-            timestamp: new Date()
-          });
-          
-          // Third sequential message after 6 seconds (2 seconds after the second)
-          const timer3 = setTimeout(() => {
-            addMessage({
-              id: Date.now() + 3,
-              role: 'assistant',
-              content: t('chatbot_welcome_msg3'),
-              timestamp: new Date()
-            });
-            
-            // Fourth sequential message after 8 seconds (2 seconds after the third)
-            const timer4 = setTimeout(() => {
-              addMessage({
-                id: Date.now() + 4,
-                role: 'assistant',
-                content: t('chatbot_welcome_msg4'),
-                timestamp: new Date()
-              });
-            }, 2000);
-            
-            return () => clearTimeout(timer4);
-          }, 2000);
-          
-          return () => clearTimeout(timer3);
-        }, 2000);
-        
-        return () => clearTimeout(timer2);
-      }, 2000);
-      
-      return () => clearTimeout(timer1);
-    }
-  }, [isOpen, addMessage, t]);
   
   // Handle form submission
   const handleSubmit = (e) => {
@@ -96,54 +42,6 @@ const ChatBot = () => {
     if (inputValue.trim()) {
       sendMessage(inputValue);
     }
-  };
-  
-  // Handle custom clear chat to include welcome sequence again
-  const handleClearChat = () => {
-    clearChat();
-    
-    // Wait a short time for the chat to clear before sending the welcome messages
-    setTimeout(() => {
-      // First sequential message after 2 seconds
-      setTimeout(() => {
-        addMessage({
-          id: Date.now() + 1,
-          role: 'assistant',
-          content: t('chatbot_welcome_msg1'),
-          timestamp: new Date()
-        });
-        
-        // Second sequential message
-        setTimeout(() => {
-          addMessage({
-            id: Date.now() + 2,
-            role: 'assistant',
-            content: t('chatbot_welcome_msg2'),
-            timestamp: new Date()
-          });
-          
-          // Third sequential message
-          setTimeout(() => {
-            addMessage({
-              id: Date.now() + 3,
-              role: 'assistant',
-              content: t('chatbot_welcome_msg3'),
-              timestamp: new Date()
-            });
-            
-            // Fourth sequential message
-            setTimeout(() => {
-              addMessage({
-                id: Date.now() + 4,
-                role: 'assistant',
-                content: t('chatbot_welcome_msg4'),
-                timestamp: new Date()
-              });
-            }, 2000);
-          }, 2000);
-        }, 2000);
-      }, 2000);
-    }, 100);
   };
   
   // Animation variants for the chat container
@@ -191,7 +89,7 @@ const ChatBot = () => {
               </div>
             </div>
             <button
-              onClick={handleClearChat}
+              onClick={clearChat}
               className="text-white opacity-70 hover:opacity-100 transition-opacity"
               title={t('clear_chat')}
               aria-label={t('clear_chat')}
