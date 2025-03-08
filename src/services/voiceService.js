@@ -98,25 +98,25 @@ const createSpeechRecognition = (language = 'en-US', onResult, onEnd) => {
   return recognition;
 };
 
-// Voice preferences - can be customized based on user preferences
+// Voice preferences - optimized for female voice
 const voicePreferences = {
   en: {
-    // For Jarvis-like experience, prefer British male voice
-    preferredGender: 'male',
-    // Prioritize British voices like those in Iron Man's J.A.R.V.I.S.
-    preferredVoiceNames: ['Google UK English Male', 'Microsoft George', 'Daniel', 'British Male']
+    // Set preference to female voice
+    preferredGender: 'female',
+    // Prioritize common female voices across platforms
+    preferredVoiceNames: ['Google US English Female', 'Microsoft Zira', 'Samantha', 'Google UK English Female', 'Karen']
   },
   ml: {
-    preferredGender: 'male',
+    preferredGender: 'female',
     preferredVoiceNames: []
   },
   ta: {
-    preferredGender: 'male',
+    preferredGender: 'female',
     preferredVoiceNames: []
   }
 };
 
-// Text-to-speech function with enhanced voice selection for Jarvis-like effect
+// Text-to-speech function with enhanced voice selection for female voice
 const speak = (text, language = 'en', voiceType = 'default') => {
   if (!window.speechSynthesis) {
     console.warn('Speech synthesis not supported');
@@ -129,11 +129,11 @@ const speak = (text, language = 'en', voiceType = 'default') => {
     
     const utterance = new SpeechSynthesisUtterance(text);
     const langCode = languageCodes[language] || 'en-US';
-    utterance.lang = language === 'en' ? 'en-GB' : langCode; // Prefer British English for Jarvis
+    utterance.lang = langCode;
     
-    // Default parameters
-    utterance.rate = 0.9;    // Slightly slower than default
-    utterance.pitch = 0.9;   // Slightly lower pitch
+    // Default parameters - adjusted for female voice
+    utterance.rate = 1.0;    // Normal speed
+    utterance.pitch = 1.1;   // Slightly higher pitch for female voice
     utterance.volume = 1.0;  // Full volume
     
     console.log(`Speaking in language: ${language} (${utterance.lang})`, text);
@@ -158,14 +158,13 @@ const speak = (text, language = 'en', voiceType = 'default') => {
             console.log(`Voice ${i}: ${voice.name} (${voice.lang}) - ${voice.localService ? 'local' : 'remote'}`);
           });
           
-          // For Jarvis, prioritize British English voices
-          let targetLang = language === 'en' ? 'en-GB' : langCode;
+          // Filter voices by language
           let languageVoices = voices.filter(voice => 
-            voice.lang.startsWith(targetLang.split('-')[0])
+            voice.lang.startsWith(langCode.split('-')[0])
           );
           
-          // If no British voices found for English, fall back to any English
-          if (language === 'en' && languageVoices.length === 0) {
+          // If no matching voices found, fall back to any English
+          if (languageVoices.length === 0) {
             languageVoices = voices.filter(voice => 
               voice.lang.startsWith('en')
             );
@@ -184,27 +183,28 @@ const speak = (text, language = 'en', voiceType = 'default') => {
                 
                 if (matchedVoice) {
                   utterance.voice = matchedVoice;
-                  console.log(`Using Jarvis-like voice: ${matchedVoice.name}`);
+                  console.log(`Using preferred female voice: ${matchedVoice.name}`);
                   break;
                 }
               }
             }
             
-            // If no preferred voice found, try by gender for male voice
-            if (!utterance.voice && prefs.preferredGender === 'male') {
-              const maleVoices = languageVoices.filter(voice => {
+            // If no preferred voice found, try by gender for female voice
+            if (!utterance.voice && prefs.preferredGender === 'female') {
+              const femaleVoices = languageVoices.filter(voice => {
                 // Try to guess gender from voice name
                 const voiceName = voice.name.toLowerCase();
-                return voiceName.includes('male') || 
-                      voiceName.includes('david') || 
-                      voiceName.includes('george') || 
-                      voiceName.includes('daniel') || 
-                      voiceName.includes('thomas');
+                return voiceName.includes('female') || 
+                      voiceName.includes('zira') || 
+                      voiceName.includes('samantha') || 
+                      voiceName.includes('karen') ||
+                      voiceName.includes('victoria') ||
+                      voiceName.includes('susan');
               });
               
-              if (maleVoices.length > 0) {
-                utterance.voice = maleVoices[0];
-                console.log(`Using male voice for Jarvis: ${utterance.voice.name}`);
+              if (femaleVoices.length > 0) {
+                utterance.voice = femaleVoices[0];
+                console.log(`Using female voice: ${utterance.voice.name}`);
               }
             }
             
@@ -218,10 +218,10 @@ const speak = (text, language = 'en', voiceType = 'default') => {
           }
         }
         
-        // J.A.R.V.I.S. specific voice tuning (especially for English)
-        if (language === 'en' || voiceType === 'jarvis') {
-          utterance.pitch = 0.85;  // Slightly lower pitch for authority
-          utterance.rate = 0.9;    // Slightly slower for clarity
+        // Female voice tuning
+        if (voiceType === 'female') {
+          utterance.pitch = 1.1;  // Slightly higher pitch for female voice
+          utterance.rate = 1.0;   // Normal speed
         }
         
         window.speechSynthesis.speak(utterance);
@@ -379,8 +379,8 @@ export const useVoiceControl = (recipeData) => {
     console.log(`Response (${currentLanguage}):`, response);
     setVoiceResponse(response);
     
-    // Use 'jarvis' voice type for all responses
-    speak(response, currentLanguage, 'jarvis');
+    // Use 'female' voice type for all responses
+    speak(response, currentLanguage, 'female');
     
     // Reset processing flag with delay
     setTimeout(() => {
@@ -414,11 +414,11 @@ export const useVoiceControl = (recipeData) => {
     }
     
     try {
-      // First, speak the J.A.R.V.I.S. style greeting
-      const jarvisGreeting = "Hello Jarvis here, ready for your service as audio commando.";
-      setVoiceResponse(jarvisGreeting);
-      // Use 'jarvis' voice type for the greeting
-      speak(jarvisGreeting, currentLanguage, 'jarvis');
+      // First, speak the greeting with female voice
+      const greeting = "Hello there! I'm your cooking assistant. Ready for your service";
+      setVoiceResponse(greeting);
+      // Use 'female' voice type for the greeting
+      speak(greeting, currentLanguage, 'female');
       
       // Wait a moment before starting the actual recognition
       setTimeout(() => {
@@ -484,7 +484,7 @@ export const useVoiceControl = (recipeData) => {
     startVoiceControl,
     stopVoiceControl,
     toggleVoiceControl,
-    speak: (text) => speak(text, currentLanguage),
+    speak: (text) => speak(text, currentLanguage, 'female'),
     supported: supported ? supported.recognition && supported.synthesis : false
   };
 };
