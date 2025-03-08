@@ -315,28 +315,35 @@ export const useVoiceControl = (recipeData) => {
     }
     
     try {
-      // Create a new recognition instance
-      const langCode = languageCodes[currentLanguage] || 'en-US';
-      console.log(`Starting voice recognition with language: ${currentLanguage} (${langCode})`);
+      // First, speak the Jarvis greeting
+      const jarvisGreeting = "Hello Jarvis here, ready for your service as audio commando";
+      setVoiceResponse(jarvisGreeting);
+      speak(jarvisGreeting, currentLanguage);
       
-      const recognition = createSpeechRecognition(
-        langCode,
-        handleSpeechResult,
-        handleSpeechEnd
-      );
-      
-      if (!recognition) {
-        throw new Error('Failed to create speech recognition');
-      }
-      
-      // Store the recognition instance
-      recognitionRef.current = recognition;
-      
-      // Start listening
-      recognition.start();
-      setIsListening(true);
-      setVoiceResponse(t('listening'));
-      speak(t('listening'), currentLanguage);
+      // Wait a moment before starting the actual recognition
+      setTimeout(() => {
+        // Create a new recognition instance
+        const langCode = languageCodes[currentLanguage] || 'en-US';
+        console.log(`Starting voice recognition with language: ${currentLanguage} (${langCode})`);
+        
+        const recognition = createSpeechRecognition(
+          langCode,
+          handleSpeechResult,
+          handleSpeechEnd
+        );
+        
+        if (!recognition) {
+          throw new Error('Failed to create speech recognition');
+        }
+        
+        // Store the recognition instance
+        recognitionRef.current = recognition;
+        
+        // Start listening
+        recognition.start();
+        setIsListening(true);
+        setVoiceResponse(t('listening'));
+      }, 2000); // Wait 2 seconds after the greeting before starting to listen
     } catch (error) {
       console.error('Error starting voice control:', error);
       setVoiceResponse(t('voice_control_error'));
