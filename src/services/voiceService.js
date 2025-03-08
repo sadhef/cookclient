@@ -415,7 +415,7 @@ export const useVoiceControl = (recipeData) => {
     
     try {
       // First, speak the J.A.R.V.I.S. style greeting
-      const jarvisGreeting = "Hello Sir. J.A.R.V.I.S. here, ready for your service as audio commando.";
+      const jarvisGreeting = "Hello Jarvis here, ready for your service as audio commando.";
       setVoiceResponse(jarvisGreeting);
       // Use 'jarvis' voice type for the greeting
       speak(jarvisGreeting, currentLanguage, 'jarvis');
