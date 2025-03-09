@@ -1,4 +1,3 @@
-// client/src/context/ChatbotContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useLanguage } from './LanguageContext';
 import { getChatbotResponse, suggestRecipes, getMockResponse } from '../services/chatbotService';
@@ -32,56 +31,6 @@ export const ChatbotProvider = ({ children }) => {
   const toggleChat = () => {
     setIsOpen(prevState => !prevState);
   };
-
-  // Function to send the sequential messages
-  const sendSequentialMessages = () => {
-    setIsTyping(true);
-    
-    // First response after 2 seconds
-    setTimeout(() => {
-      const response1 = {
-        id: `bot-seq-1-${Date.now()}`,
-        text: t('chatbot_response_1'),
-        isUser: false,
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, response1]);
-      
-      // Second response after 2 more seconds (4 seconds total)
-      setTimeout(() => {
-        const response2 = {
-          id: `bot-seq-2-${Date.now()}`,
-          text: t('chatbot_response_2'),
-          isUser: false,
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, response2]);
-        
-        // Third response after 2 more seconds (6 seconds total)
-        setTimeout(() => {
-          const response3 = {
-            id: `bot-seq-3-${Date.now()}`,
-            text: t('chatbot_response_3'),
-            isUser: false,
-            timestamp: new Date()
-          };
-          setMessages(prev => [...prev, response3]);
-          
-          // Fourth response after 2 more seconds (8 seconds total)
-          setTimeout(() => {
-            const response4 = {
-              id: `bot-seq-4-${Date.now()}`,
-              text: t('chatbot_response_4'),
-              isUser: false,
-              timestamp: new Date()
-            };
-            setMessages(prev => [...prev, response4]);
-            setIsTyping(false);
-          }, 2000);
-        }, 2000);
-      }, 2000);
-    }, 2000);
-  };
   
   // Send a message to the chatbot
   const sendMessage = async (text) => {
@@ -97,14 +46,6 @@ export const ChatbotProvider = ({ children }) => {
     
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
-    
-    // Check if the user message is "hi" (case insensitive)
-    if (text.trim().toLowerCase() === 'hi') {
-      // Send the special sequence of responses
-      sendSequentialMessages();
-      return;
-    }
-    
     setIsTyping(true);
     
     // Add a delay to simulate thinking (min 1s, max 1.5s + 100ms per character up to 3s)
@@ -307,8 +248,7 @@ Try searching for these basic recipes in the COokiFy search bar for more detaile
     sendMessage,
     getRecipeSuggestions,
     clearChat,
-    resetOfflineMode,
-    sendSequentialMessages
+    resetOfflineMode
   };
   
   return (
