@@ -72,7 +72,7 @@ const createSpeechRecognition = (language = 'en-US', onResult, onEnd) => {
   const recognition = new SpeechRecognition();
   recognition.lang = language;
   recognition.interimResults = false;
-  recognition.continuous = true; // Set to continuous to keep listening longer
+  recognition.continuous = true; // Enable continuous listening
   recognition.maxAlternatives = 1;
   
   recognition.onresult = (event) => {
@@ -250,6 +250,7 @@ export const useVoiceControl = (recipeData) => {
   const recognitionRef = useRef(null);
   const processingRef = useRef(false);
   const listeningTimeoutRef = useRef(null);
+  const restartTimeoutRef = useRef(null);
   
   // Check browser support on mount
   useEffect(() => {
@@ -272,6 +273,10 @@ export const useVoiceControl = (recipeData) => {
       // Clear any pending timeouts
       if (listeningTimeoutRef.current) {
         clearTimeout(listeningTimeoutRef.current);
+      }
+      
+      if (restartTimeoutRef.current) {
+        clearTimeout(restartTimeoutRef.current);
       }
     };
   }, []);
@@ -298,36 +303,29 @@ export const useVoiceControl = (recipeData) => {
     return matches.length > 0;
   }, [currentLanguage]);
   
-  // Reset the listening timeout to keep the microphone active
-  const resetListeningTimeout = useCallback(() => {
-    // Clear any existing timeout
-    if (listeningTimeoutRef.current) {
-      clearTimeout(listeningTimeoutRef.current);
-    }
-    
-    // Set a new timeout to ensure the mic stays on for at least 6 seconds
-    listeningTimeoutRef.current = setTimeout(() => {
-      // After the timeout, we'll restart recognition if it's still in listening state
-      if (isListening && recognitionRef.current) {
-        try {
-          // This is a trick to keep the recognition going - stop and start again
-          recognitionRef.current.stop();
-          
-          // Small delay before restarting
-          setTimeout(() => {
-            if (isListening) { // Double-check if still listening
-              recognitionRef.current.start();
-              console.log("Restarting speech recognition to extend listening time");
-              
-              // Set another timeout for continuous listening
-              resetListeningTimeout();
-            }
-          }, 300);
-        } catch (e) {
-          console.warn('Error resetting speech recognition:', e);
-        }
+  // Function to forcibly restart recognition to keep it active
+  const forceRecognitionRestart = useCallback(() => {
+    if (isListening && recognitionRef.current) {
+      try {
+        console.log("Force-restarting speech recognition to maintain activity");
+        
+        // Stop the current recognition instance
+        recognitionRef.current.stop();
+        
+        // Small delay before starting again
+        restartTimeoutRef.current = setTimeout(() => {
+          if (isListening) { // Make sure we're still supposed to be listening
+            recognitionRef.current.start();
+            console.log("Recognition restarted successfully");
+            
+            // Set up the next restart cycle (every 10 seconds to be safe)
+            listeningTimeoutRef.current = setTimeout(forceRecognitionRestart, 10000);
+          }
+        }, 500);
+      } catch (e) {
+        console.warn('Error during forced recognition restart:', e);
       }
-    }, 6000); // 6 seconds minimum listening time
+    }
   }, [isListening]);
   
   // Process the recognized speech
@@ -420,8 +418,11 @@ export const useVoiceControl = (recipeData) => {
     // Use 'female' voice type for all responses
     speak(response, currentLanguage, 'female');
     
-    // Reset the listening timeout to ensure we keep listening after response
-    resetListeningTimeout();
+    // Force-restart recognition after processing a command to keep it active
+    // We do this after a short delay to allow the speech synthesis to complete
+    setTimeout(() => {
+      forceRecognitionRestart();
+    }, 1000);
     
     // Reset processing flag with delay
     setTimeout(() => {
@@ -429,7 +430,7 @@ export const useVoiceControl = (recipeData) => {
     }, 1000);
     
     return response;
-  }, [recipeData, currentStep, currentLanguage, t, patterns, matchesPattern, resetListeningTimeout]);
+  }, [recipeData, currentStep, currentLanguage, t, patterns, matchesPattern, forceRecognitionRestart]);
   
   // Handle speech recognition result
   const handleSpeechResult = useCallback((result) => {
@@ -442,14 +443,29 @@ export const useVoiceControl = (recipeData) => {
   const handleSpeechEnd = useCallback(() => {
     console.log("Speech recognition ended, checking if we should restart");
     
-    // Only set isListening to false if there's no pending restart
-    if (!listeningTimeoutRef.current) {
-      setIsListening(false);
+    // Ensure we restart recognition if it ends unexpectedly
+    // But only if we're still supposed to be in listening mode
+    if (isListening) {
+      restartTimeoutRef.current = setTimeout(() => {
+        if (isListening && recognitionRef.current) {
+          try {
+            recognitionRef.current.start();
+            console.log("Recognition automatically restarted after ending");
+            
+            // Set up the next restart cycle
+            listeningTimeoutRef.current = setTimeout(forceRecognitionRestart, 10000);
+          } catch (e) {
+            console.warn('Error auto-restarting recognition:', e);
+            // If restart fails, set isListening to false
+            setIsListening(false);
+          }
+        }
+      }, 300);
     } else {
-      // Otherwise let the timeout handler restart recognition
-      console.log("Waiting for timeout to restart recognition");
+      // If we're not supposed to be listening anymore, ensure state is correct
+      setIsListening(false);
     }
-  }, []);
+  }, [isListening, forceRecognitionRestart]);
   
   // Start voice control
   const startVoiceControl = useCallback(() => {
@@ -493,8 +509,8 @@ export const useVoiceControl = (recipeData) => {
         setIsListening(true);
         setVoiceResponse(t('listening'));
         
-        // Initialize the listening timeout
-        resetListeningTimeout();
+        // Set up the automatic restart cycle to keep recognition active
+        listeningTimeoutRef.current = setTimeout(forceRecognitionRestart, 10000);
         
       }, 2500); // Wait 2.5 seconds after the greeting before starting to listen
     } catch (error) {
@@ -503,7 +519,7 @@ export const useVoiceControl = (recipeData) => {
       speak(t('voice_control_error'), currentLanguage);
       setIsListening(false);
     }
-  }, [isListening, supported, currentLanguage, t, handleSpeechResult, handleSpeechEnd, resetListeningTimeout]);
+  }, [isListening, supported, currentLanguage, t, handleSpeechResult, handleSpeechEnd, forceRecognitionRestart]);
   
   // Stop voice control
   const stopVoiceControl = useCallback(() => {
@@ -514,6 +530,11 @@ export const useVoiceControl = (recipeData) => {
       if (listeningTimeoutRef.current) {
         clearTimeout(listeningTimeoutRef.current);
         listeningTimeoutRef.current = null;
+      }
+      
+      if (restartTimeoutRef.current) {
+        clearTimeout(restartTimeoutRef.current);
+        restartTimeoutRef.current = null;
       }
       
       if (recognitionRef.current) {
