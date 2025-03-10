@@ -185,7 +185,7 @@ const HomePage = () => {
                 className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-pink-400 to-rose-500 hover:from-pink-500 hover:to-rose-600 text-white text-xl font-medium rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
               >
                 <FaSearch className="mr-3" />
-                <span>{t('search_recipes')}</span>
+                <span>{t('Search Recipes')}</span>
               </Link>
             </div>
             
