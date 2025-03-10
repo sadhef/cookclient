@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { FaSearch, FaFilter, FaLightbulb, FaSortDown, FaHeart, FaStar, FaUtensils, FaClock, FaMagic } from 'react-icons/fa';
+import { FaSearch, FaFilter, FaLightbulb, FaSortDown, FaHeart, FaStar, FaUtensils, FaClock, FaMagic, FaCheckCircle } from 'react-icons/fa';
 import { useLanguage } from '../context/LanguageContext';
 import { getRecipes, searchRecipesByIngredients } from '../services/recipeService';
 import RecipeCard from '../components/recipe/RecipeCard';
@@ -20,6 +20,7 @@ const SearchResults = () => {
   const [hasSuggestedRecipes, setHasSuggestedRecipes] = useState(false);
   const [sortOption, setSortOption] = useState('best_match'); // Default sort option
   const [searchAnimation, setSearchAnimation] = useState(false);
+  const [searchIngredients, setSearchIngredients] = useState([]);
   
   // Filter states
   const [filters, setFilters] = useState({
@@ -34,7 +35,7 @@ const SearchResults = () => {
       setLoading(true);
       const result = await getRecipes({
         sort: '-createdAt',
-        limit: 12
+        limit: 15
       });
       
       // Handle different response structures
@@ -47,6 +48,7 @@ const SearchResults = () => {
         setTotalResults(0);
       }
       setHasSuggestedRecipes(false);
+      setSearchIngredients([]);
     } catch (error) {
       console.error('Error fetching latest recipes:', error);
       toast.error(error || t('error_occurred'));
@@ -70,6 +72,9 @@ const SearchResults = () => {
         fetchLatestRecipes();
         return;
       }
+      
+      // Save the search ingredients for highlighting in recipe cards
+      setSearchIngredients(ingredientsArray);
       
       const results = await searchRecipesByIngredients(ingredientsArray);
       
@@ -95,6 +100,7 @@ const SearchResults = () => {
         sessionStorage.setItem('searchResults', JSON.stringify(results));
         sessionStorage.setItem('searchIngredients', ingredients);
         sessionStorage.setItem('hasSuggestedRecipes', JSON.stringify(hasSuggested));
+        sessionStorage.setItem('parsedIngredients', JSON.stringify(ingredientsArray));
       } catch (storageError) {
         console.error('Error storing search results in sessionStorage:', storageError);
       }
@@ -110,6 +116,7 @@ const SearchResults = () => {
       setRecipes([]);
       setTotalResults(0);
       setSearchAnimation(false);
+      setSearchIngredients([]);
       
       navigate(`/search?ingredients=${encodeURIComponent(ingredients)}`);
     } finally {
@@ -131,6 +138,7 @@ const SearchResults = () => {
         const storedResults = sessionStorage.getItem('searchResults');
         const storedIngredients = sessionStorage.getItem('searchIngredients');
         const storedHasSuggested = sessionStorage.getItem('hasSuggestedRecipes');
+        const storedParsedIngredients = sessionStorage.getItem('parsedIngredients');
         
         if (storedResults && storedIngredients) {
           setSearchTerm(storedIngredients);
@@ -142,6 +150,15 @@ const SearchResults = () => {
             
             if (storedHasSuggested) {
               setHasSuggestedRecipes(JSON.parse(storedHasSuggested));
+            }
+            
+            if (storedParsedIngredients) {
+              try {
+                setSearchIngredients(JSON.parse(storedParsedIngredients));
+              } catch (e) {
+                console.error('Error parsing stored ingredients array:', e);
+                setSearchIngredients([]);
+              }
             }
             
             setLoading(false);
@@ -352,6 +369,21 @@ const SearchResults = () => {
             </div>
           </form>
           
+          {/* Search Ingredients Pills - Display for better UX */}
+          {searchIngredients.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {searchIngredients.map((ingredient, index) => (
+                <span 
+                  key={index} 
+                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-700"
+                >
+                  <FaCheckCircle className="mr-1" size={10} />
+                  {ingredient}
+                </span>
+              ))}
+            </div>
+          )}
+          
           {/* Filters Panel */}
           {filtersOpen && (
             <div className="mt-6 p-6 border-t border-pink-100 animate-slide-up bg-pink-50/50 rounded-2xl">
@@ -519,6 +551,7 @@ const SearchResults = () => {
                       <RecipeCard 
                         recipe={recipe} 
                         showSimilarityScore={hasScores}
+                        searchIngredients={searchIngredients}
                       />
                     </div>
                   ))}
@@ -543,7 +576,10 @@ const SearchResults = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {suggestedRecipes.map(recipe => (
                     <div key={recipe._id} className="transform hover:scale-105 transition-transform duration-300">
-                      <RecipeCard recipe={recipe} />
+                      <RecipeCard 
+                        recipe={recipe}
+                        searchIngredients={searchIngredients}
+                      />
                     </div>
                   ))}
                 </div>
@@ -551,7 +587,7 @@ const SearchResults = () => {
             )}
             
             {/* Pagination - cute version */}
-            {totalResults > 12 && (
+            {totalResults > 15 && (
               <div className="mt-16 flex justify-center">
                 <nav className="inline-flex rounded-full shadow-md overflow-hidden">
                   <button
@@ -562,11 +598,11 @@ const SearchResults = () => {
                     {t('previous')}
                   </button>
                   <div className="bg-pink-100 px-4 flex items-center text-pink-600 font-medium">
-                    {currentPage} / {Math.ceil(totalResults / 12)}
+                    {currentPage} / {Math.ceil(totalResults / 15)}
                   </div>
                   <button
                     onClick={() => setCurrentPage(prev => prev + 1)}
-                    disabled={currentPage * 12 >= totalResults}
+                    disabled={currentPage * 15 >= totalResults}
                     className="relative inline-flex items-center px-6 py-3 border-l border-pink-200 bg-white text-sm font-medium text-pink-500 hover:bg-pink-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300"
                   >
                     {t('next')}
@@ -580,12 +616,5 @@ const SearchResults = () => {
     </div>
   );
 };
-
-// Add FaCheckCircle to imports at the top
-const FaCheckCircle = (props) => (
-  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 512 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg" {...props}>
-    <path d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z"></path>
-  </svg>
-);
 
 export default SearchResults;

@@ -53,7 +53,7 @@ export const searchRecipesByIngredients = async (ingredients) => {
       // Return popular recipes instead
       return await getRecipes({
         sort: '-averageRating',
-        limit: 10
+        limit: 15
       });
     }
     
@@ -64,7 +64,7 @@ export const searchRecipesByIngredients = async (ingredients) => {
     if (searchIngredient.length <= 1) {
       return await getRecipes({
         sort: '-averageRating',
-        limit: 10
+        limit: 15
       });
     }
     
@@ -124,8 +124,8 @@ export const searchRecipesByIngredients = async (ingredients) => {
           const existingIds = new Set(recipesFound.map(r => r._id));
           const additionalRecipes = fallbackRecipes.filter(r => !existingIds.has(r._id));
           
-          // Add enough additional recipes to get to at least 5 total
-          const neededRecipes = Math.max(0, 5 - recipesFound.length);
+          // Add enough additional recipes to get to at least 15 total
+          const neededRecipes = Math.max(0, 15 - recipesFound.length);
           const recipesToAdd = additionalRecipes.slice(0, neededRecipes);
           
           console.log(`Adding ${recipesToAdd.length} more recipes from fallback search`);
@@ -148,21 +148,21 @@ export const searchRecipesByIngredients = async (ingredients) => {
     }
     
     // Final fallback to popular recipes if still not enough
-    if (recipesFound.length < 5) {
+    if (recipesFound.length < 15) {
       console.log('Still not enough recipes, fetching popular recipes');
       
       try {
         const popularResponse = await getRecipes({
           sort: '-averageRating',
-          limit: 10
+          limit: 15
         });
         
         if (popularResponse?.data && Array.isArray(popularResponse.data)) {
           const existingIds = new Set(recipesFound.map(r => r._id));
           const additionalRecipes = popularResponse.data.filter(r => !existingIds.has(r._id));
           
-          // Add enough additional recipes to get to at least 5 total
-          const neededRecipes = Math.max(0, 5 - recipesFound.length);
+          // Add enough additional recipes to get to at least 15 total
+          const neededRecipes = Math.max(0, 15 - recipesFound.length);
           const recipesToAdd = additionalRecipes.slice(0, neededRecipes);
           
           console.log(`Adding ${recipesToAdd.length} popular recipes as fallback`);

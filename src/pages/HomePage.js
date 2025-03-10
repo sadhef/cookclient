@@ -2,20 +2,151 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaSearch, FaMicrophone, FaCalculator, FaLanguage, FaRobot, FaHeart, FaStar, FaUtensils, FaClock } from 'react-icons/fa';
 import { useLanguage } from '../context/LanguageContext';
-import { useChat } from '../context/ChatbotContext';
 import RecipeCard from '../components/recipe/RecipeCard';
 import { getRecipes, searchRecipesByIngredients } from '../services/recipeService';
 import { toast } from 'react-toastify';
 
+// Component for the search box with ingredient suggestions
+const IngredientSearchBox = ({ ingredients, setIngredients, onSearch, loading }) => {
+  const { t } = useLanguage();
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedSuggestions, setSelectedSuggestions] = useState([]);
+
+  // Common ingredients for suggestions
+  const commonIngredients = [
+    'chicken', 'beef', 'pork', 'fish', 'tomato', 'onion', 'garlic', 
+    'potato', 'carrot', 'broccoli', 'rice', 'pasta', 'cheese', 'egg',
+    'mushroom', 'bell pepper', 'spinach', 'olive oil', 'butter', 'milk'
+  ];
+
+  // Handle form submission
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSearch(e);
+  };
+
+  // Add a suggested ingredient to the search
+  const addSuggestion = (ingredient) => {
+    // Check if already selected
+    if (selectedSuggestions.includes(ingredient)) {
+      return;
+    }
+
+    // Add to selected suggestions
+    setSelectedSuggestions([...selectedSuggestions, ingredient]);
+
+    // Add to the search input
+    let currentIngredients = ingredients.split(',').map(i => i.trim()).filter(Boolean);
+    currentIngredients.push(ingredient);
+    setIngredients(currentIngredients.join(', '));
+  };
+
+  // Remove a selected suggestion
+  const removeSuggestion = (ingredient) => {
+    setSelectedSuggestions(selectedSuggestions.filter(i => i !== ingredient));
+    
+    // Remove from the search input
+    let currentIngredients = ingredients.split(',').map(i => i.trim()).filter(Boolean);
+    currentIngredients = currentIngredients.filter(i => i !== ingredient);
+    setIngredients(currentIngredients.join(', '));
+  };
+
+  // Initialize selected suggestions from current ingredients
+  useEffect(() => {
+    if (ingredients) {
+      const ingredientsArray = ingredients.split(',').map(i => i.trim()).filter(Boolean);
+      setSelectedSuggestions(ingredientsArray);
+    }
+  }, []);
+
+  return (
+    <div>
+      <form onSubmit={handleSubmit} className="mb-2">
+        <div className="flex flex-col md:flex-row gap-2">
+          <div className="relative flex-grow">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <FaSearch className="text-pink-300" />
+            </div>
+            <input
+              type="text"
+              value={ingredients}
+              onChange={(e) => {
+                setIngredients(e.target.value);
+                setShowSuggestions(true);
+              }}
+              onFocus={() => setShowSuggestions(true)}
+              className="block w-full py-4 pl-12 pr-4 text-gray-700 bg-white border-0 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 shadow-inner"
+              placeholder={t('ingredients_placeholder')}
+            />
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              disabled={loading}
+              className="py-4 px-8 bg-gradient-to-r from-pink-400 to-rose-500 text-white font-medium rounded-full hover:from-pink-500 hover:to-rose-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-400 shadow-md transition-all duration-300 transform hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {loading ? t('searching') : t('find_recipes')}
+            </button>
+          </div>
+        </div>
+      </form>
+
+      {/* Selected ingredients pills */}
+      {selectedSuggestions.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {selectedSuggestions.map((ingredient) => (
+            <span 
+              key={ingredient}
+              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-700"
+            >
+              {ingredient}
+              <button 
+                type="button" 
+                onClick={() => removeSuggestion(ingredient)}
+                className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full text-pink-700 hover:bg-pink-400 hover:text-white"
+              >
+                &times;
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Common ingredients suggestions */}
+      {showSuggestions && (
+        <div className="mt-2 mb-6">
+          <p className="text-sm text-white opacity-90 mb-2">{t('common_ingredients')}:</p>
+          <div className="flex flex-wrap gap-2">
+            {commonIngredients.map((ingredient) => (
+              <button
+                key={ingredient}
+                type="button"
+                onClick={() => addSuggestion(ingredient)}
+                className={`px-2 py-1 text-xs rounded-full ${
+                  selectedSuggestions.includes(ingredient)
+                    ? 'bg-pink-400 text-white'
+                    : 'bg-white/20 text-white hover:bg-white/30'
+                }`}
+              >
+                {ingredient}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const HomePage = () => {
   const { t } = useLanguage();
-  const { toggleChat, getRecipeSuggestions } = useChat();
   const navigate = useNavigate();
   
   const [ingredients, setIngredients] = useState('');
   const [topRatedRecipes, setTopRatedRecipes] = useState([]);
   const [latestRecipes, setLatestRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchLoading, setSearchLoading] = useState(false);
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
 
   useEffect(() => {
@@ -91,49 +222,43 @@ const HomePage = () => {
     }
     
     try {
-      // Search directly if fewer than 5 ingredients
+      setSearchLoading(true);
+      
+      // Prepare ingredients array
       const ingredientsArray = ingredients.split(',').map(i => i.trim()).filter(Boolean);
       
-      if (ingredientsArray.length <= 5) {
+      // If we have ingredients, search for recipes
+      if (ingredientsArray.length > 0) {
         try {
+          // Show animation effect
+          setShowHeartAnimation(true);
+          setTimeout(() => setShowHeartAnimation(false), 1500);
+          
+          // Call search API
           const searchResults = await searchRecipesByIngredients(ingredientsArray);
           
-          // Store search results in sessionStorage
+          // Store search data in sessionStorage
           sessionStorage.setItem('searchResults', JSON.stringify(searchResults.data || searchResults));
           sessionStorage.setItem('searchIngredients', ingredients);
+          sessionStorage.setItem('parsedIngredients', JSON.stringify(ingredientsArray));
           
+          // Navigate to results page
           navigate('/search');
         } catch (error) {
           console.error('Search error:', error);
           navigate(`/search?ingredients=${encodeURIComponent(ingredients)}`);
         }
       } else {
-        // Just pass to search page with query params
+        // If no valid ingredients, just navigate with query params
         navigate(`/search?ingredients=${encodeURIComponent(ingredients)}`);
       }
     } catch (error) {
       console.error('Search error:', error);
       toast.error(t('search_error'));
       navigate(`/search?ingredients=${encodeURIComponent(ingredients)}`);
+    } finally {
+      setSearchLoading(false);
     }
-  };
-  
-  // Handle asking Cookie for suggestions
-  const handleAskCookie = () => {
-    if (!ingredients.trim()) {
-      toast.info(t('enter_ingredients'));
-      return;
-    }
-    
-    const ingredientsArray = ingredients.split(',').map(i => i.trim()).filter(Boolean);
-    
-    // Open chatbot and ask for suggestions
-    getRecipeSuggestions(ingredientsArray);
-    toggleChat();
-    
-    // Show heart animation
-    setShowHeartAnimation(true);
-    setTimeout(() => setShowHeartAnimation(false), 1500);
   };
 
   return (
@@ -154,7 +279,7 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Heart animation when asking Cookie */}
+      {/* Heart animation when searching */}
       {showHeartAnimation && (
         <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
           <div className="animate-float-up-and-fade">
@@ -167,24 +292,12 @@ const HomePage = () => {
       <div className="relative text-white overflow-hidden rounded-b-[50px] shadow-xl">
         {/* Video Background with enhanced presentation */}
         <div className="absolute inset-0 w-full h-full z-0">
-          <video 
-            autoPlay 
-            loop 
-            muted 
-            playsInline
-            className="w-full h-full object-cover"
-            style={{ 
-              filter: 'brightness(0.65) contrast(1.1) saturate(1.2)',
-              transformOrigin: 'center center',
-              transform: 'scale(1.02)' // Subtle zoom to hide any potential edge artifacts
-            }}
-          >
-            <source src="/IMG_9234.MOV" type="video/mp4" />
-            {/* Fallback background if video fails to load */}
-            <div className="absolute inset-0 bg-gradient-to-r from-gray-800 to-gray-900"></div>
-          </video>
+          {/* Fallback background if video fails to load */}
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-800 to-gray-900"></div>
+          
           {/* Professional gradient overlay for better text visibility and premium feel */}
           <div className="absolute inset-0 bg-gradient-to-br from-black/50 via-black/40 to-black/60"></div>
+          
           {/* Subtle vignette effect for more professional look */}
           <div className="absolute inset-0 shadow-[inset_0_0_100px_rgba(0,0,0,0.6)]"></div>
         </div>
@@ -202,39 +315,15 @@ const HomePage = () => {
               {t('welcome_text')}
             </p>
             
-            {/* Search Form */}
-            <form onSubmit={handleSearch} className="mb-8 transform hover:scale-102 transition-transform duration-300">
-              <div className="flex flex-col md:flex-row gap-2 drop-shadow-lg">
-                <div className="relative flex-grow">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <FaSearch className="text-pink-300" />
-                  </div>
-                  <input
-                    type="text"
-                    value={ingredients}
-                    onChange={(e) => setIngredients(e.target.value)}
-                    className="block w-full py-4 pl-12 pr-4 text-gray-700 bg-white border-0 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 shadow-inner"
-                    placeholder={t('ingredients_placeholder')}
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    type="submit"
-                    className="py-4 px-8 bg-gradient-to-r from-pink-400 to-rose-500 text-white font-medium rounded-full hover:from-pink-500 hover:to-rose-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-400 shadow-md transition-all duration-300 transform hover:scale-105"
-                  >
-                    {t('find_recipes')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleAskCookie}
-                    className="py-4 px-6 bg-white/90 backdrop-blur-sm text-pink-500 font-medium rounded-full hover:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-400 flex items-center shadow-md transition-all duration-300 transform hover:scale-105"
-                  >
-                    <FaRobot className="mr-2" />
-                    {t('ask_Cookie')}
-                  </button>
-                </div>
-              </div>
-            </form>
+            {/* Enhanced Search Form with suggestions */}
+            <div className="mb-8 transform hover:scale-102 transition-transform duration-300">
+              <IngredientSearchBox 
+                ingredients={ingredients}
+                setIngredients={setIngredients}
+                onSearch={handleSearch}
+                loading={searchLoading}
+              />
+            </div>
             
             {/* Features */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-12">
@@ -342,6 +431,6 @@ const HomePage = () => {
       </div>
     </div>
   );
-}
+};
 
 export default HomePage;
