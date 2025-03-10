@@ -88,7 +88,7 @@ const UserFavorites = () => {
           <div className="bg-pink-100 p-3 rounded-full mr-3">
             <FaHeart className="text-pink-500 text-xl" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-800 font-cursive">{t('your_favorites')}</h1>
+          <h1 className="text-3xl font-bold text-gray-800 font-cursive">{t('Your Favorites')}</h1>
         </div>
 
         {loading ? (
@@ -103,8 +103,8 @@ const UserFavorites = () => {
                 <FaSadTear className="text-pink-400 text-4xl" />
               </div>
             </div>
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4 font-cursive">{t('no_favorites')}</h2>
-            <p className="text-gray-600 mb-8 max-w-md mx-auto">{t('no_favorites_message')}</p>
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4 font-cursive">{t('No Favorites')}</h2>
+            <p className="text-gray-600 mb-8 max-w-md mx-auto">{t('No Favorites Message')}</p>
             <Link 
               to="/search"
               className="bg-gradient-to-r from-pink-400 to-rose-500 text-white px-8 py-3 rounded-full hover:from-pink-500 hover:to-rose-600 transition-all duration-300 shadow-md inline-flex items-center"

@@ -316,7 +316,7 @@ const HomePage = () => {
           {!loading && (topRatedRecipes.length > 0 || latestRecipes.length > 0) && (
             <div className="mt-20 text-center">
               <Link to="/search" className="inline-flex items-center px-8 py-4 bg-pink-100 text-pink-600 rounded-full hover:bg-pink-200 transition-colors duration-300 shadow-md group">
-                <span className="font-medium">{t('discover_more_recipes')}</span>
+                <span className="font-medium">{t('For More Recipes')}</span>
                 <FaHeart className="ml-2 group-hover:scale-125 transition-transform duration-300" />
               </Link>
             </div>
