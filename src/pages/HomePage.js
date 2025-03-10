@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { FaMicrophone, FaCalculator, FaLanguage, FaHeart, FaStar, FaUtensils, FaClock, FaSearch, FaCookieBite, FaLeaf, FaPlay, FaPause } from 'react-icons/fa';
+import { FaMicrophone, FaCalculator, FaLanguage, FaHeart, FaStar, FaUtensils, FaClock, FaSearch, FaCookieBite, FaLeaf } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import RecipeCard from '../components/recipe/RecipeCard';
@@ -16,9 +16,6 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
-  const [isVideoError, setIsVideoError] = useState(false);
-  
-  // Reference to video element for controls
   const videoRef = useRef(null);
 
   useEffect(() => {
@@ -26,15 +23,14 @@ const HomePage = () => {
     setShowHeartAnimation(true);
     setTimeout(() => setShowHeartAnimation(false), 2500);
     
-    // Attempt to play video automatically after a short delay
-    setTimeout(() => {
-      if (videoRef.current) {
-        videoRef.current.play().catch(err => {
-          console.warn('Auto-play was prevented:', err);
-          // We don't set error state here as this is expected in some browsers
-        });
+    // Setup video element and ensure it plays properly
+    if (videoRef.current) {
+      // Check if video is ready
+      if (videoRef.current.readyState >= 2) {
+        setVideoLoaded(true);
+        playVideo();
       }
-    }, 1000);
+    }
     
     const fetchRecipes = async () => {
       try {
@@ -99,28 +95,31 @@ const HomePage = () => {
     fetchRecipes();
   }, [t]);
 
-  const handleSearchClick = () => {
-    if (!isAuthenticated) {
-      toast.info(t('login_required'));
+  // Ensure video plays and handles errors
+  const playVideo = () => {
+    if (videoRef.current) {
+      videoRef.current.play().catch(err => {
+        console.warn('Video autoplay was prevented:', err);
+        // Some browsers prevent autoplay, we'll handle it gracefully
+      });
     }
   };
 
   const handleVideoLoad = () => {
     setVideoLoaded(true);
-    console.log("Video loaded successfully");
-    
-    // Attempt to play video after it's loaded
-    if (videoRef.current) {
-      videoRef.current.play().catch(err => {
-        console.warn('Auto-play was prevented on load:', err);
-      });
-    }
+    console.log('Video loaded successfully');
+    playVideo();
   };
-  
-  const handleVideoError = (error) => {
-    console.error("Video error:", error);
-    setIsVideoError(true);
+
+  const handleVideoError = (e) => {
+    console.error('Video error:', e);
     setVideoLoaded(false);
+  };
+
+  const handleSearchClick = () => {
+    if (!isAuthenticated) {
+      toast.info(t('login_required'));
+    }
   };
 
   return (
@@ -155,8 +154,8 @@ const HomePage = () => {
 
       {/* Hero Section with Video Background */}
       <div className="relative text-white overflow-hidden rounded-b-[50px] shadow-2xl">
-        {/* Video Background with Fallback */}
-        <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
+        {/* Video Background Container - Critical for correct sizing */}
+        <div className="absolute inset-0 w-full h-full z-0 overflow-hidden" style={{ minHeight: '80vh' }}>
           {/* Main Video Element */}
           <video 
             ref={videoRef}
@@ -164,31 +163,25 @@ const HomePage = () => {
             loop 
             muted 
             playsInline
-            controls={false}
             onLoadedData={handleVideoLoad}
             onError={handleVideoError}
             className={`w-full h-full object-cover transition-opacity duration-1000 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}
-            style={{ minHeight: '70vh' }} // Ensure minimum height for better visibility
           >
             <source src="/IMG_9234.MOV" type="video/quicktime" />
-            <source src="/IMG_9234.mp4" type="video/mp4" /> {/* Fallback format */}
+            <source src="/IMG_9234.MOV" type="video/mp4" /> {/* Fallback format */}
             Your browser does not support the video tag.
           </video>
           
-          {/* Gradient fallback while video loads or if video fails */}
+          {/* Gradient fallback while video loads */}
           <div 
             className={`absolute inset-0 bg-gradient-to-r from-pink-400 to-rose-500 transition-opacity duration-1000 ${videoLoaded ? 'opacity-0' : 'opacity-100'}`}
-            style={{ minHeight: '70vh' }}
           ></div>
           
-          {/* Subtle gradient overlay for better text visibility - less opaque to let video shine */}
-          <div className="absolute inset-0 bg-gradient-to-b from-pink-900/40 via-pink-800/30 to-pink-700/40"></div>
-          
-          {/* Dreamy soft vignette - reduced intensity */}
-          <div className="absolute inset-0 shadow-[inset_0_0_100px_rgba(0,0,0,0.4)]"></div>
+          {/* Light gradient overlay for text readability - keep this minimal */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/30"></div>
         </div>
 
-        {/* Content */}
+        {/* Content - Positioned over the video */}
         <div className="container mx-auto px-4 relative z-10 pt-24 pb-36">
           <div className="max-w-3xl mx-auto text-center">
             <div className="animate-float inline-block mb-6">
