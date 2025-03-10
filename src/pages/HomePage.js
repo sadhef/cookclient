@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { FaMicrophone, FaCalculator, FaLanguage, FaHeart, FaStar, FaUtensils, FaClock, FaCookieBite, FaLeaf, FaSearch } from 'react-icons/fa';
+import { FaMicrophone, FaHeart, FaStar, FaUtensils, FaClock, FaCookieBite, FaLeaf, FaSearch } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import RecipeCard from '../components/recipe/RecipeCard';
@@ -178,49 +178,14 @@ const HomePage = () => {
               {t('welcome_text')}
             </p>
             
-            {/* Recipe Search Button - Added to hero section */}
-            <div className="mb-12">
-              <Link
-                to="/search"
-                className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-pink-400 to-rose-500 hover:from-pink-500 hover:to-rose-600 text-white text-xl font-medium rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-              >
-                <FaSearch className="mr-3" />
-                <span>{t('Search Recipes')}</span>
-              </Link>
-            </div>
-            
-            {/* Features Cards - With properly aligned text */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-10">
-              <div className="bg-white/30 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/50 transform hover:scale-105 transition-all duration-300 hover:bg-white/40 group h-full flex flex-col items-center">
-                <div className="text-white text-3xl mb-5 bg-pink-500/60 p-5 rounded-full w-20 h-20 flex items-center justify-center shadow-md group-hover:bg-pink-500/80 transition-all duration-300">
-                  <FaMicrophone className="mx-auto" />
-                </div>
-                <h3 className="text-xl font-semibold mb-3 text-center group-hover:text-white/100 text-white/90 transition-colors duration-300">Voice Control</h3>
-                <p className="text-white/80 text-center group-hover:text-white/100 transition-colors duration-300">
-                  Hands-free cooking assistance with voice commands
-                </p>
-              </div>
-              
-              <div className="bg-white/30 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/50 transform hover:scale-105 transition-all duration-300 hover:bg-white/40 group h-full flex flex-col items-center">
-                <div className="text-white text-3xl mb-5 bg-pink-500/60 p-5 rounded-full w-20 h-20 flex items-center justify-center shadow-md group-hover:bg-pink-500/80 transition-all duration-300">
-                  <FaCalculator className="mx-auto" />
-                </div>
-                <h3 className="text-xl font-semibold mb-3 text-center group-hover:text-white/100 text-white/90 transition-colors duration-300">Nutrition Calculator</h3>
-                <p className="text-white/80 text-center group-hover:text-white/100 transition-colors duration-300">
-                  Detailed nutrition information for every recipe
-                </p>
-              </div>
-              
-              <div className="bg-white/30 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/50 transform hover:scale-105 transition-all duration-300 hover:bg-white/40 group h-full flex flex-col items-center">
-                <div className="text-white text-3xl mb-5 bg-pink-500/60 p-5 rounded-full w-20 h-20 flex items-center justify-center shadow-md group-hover:bg-pink-500/80 transition-all duration-300">
-                  <FaLanguage className="mx-auto" />
-                </div>
-                <h3 className="text-xl font-semibold mb-3 text-center group-hover:text-white/100 text-white/90 transition-colors duration-300">Multilingual Support</h3>
-                <p className="text-white/80 text-center group-hover:text-white/100 transition-colors duration-300">
-                  Cook in your preferred language with multilingual support
-                </p>
-              </div>
-            </div>
+            {/* Large Recipe Search Button */}
+            <Link
+              to="/search"
+              className="inline-flex items-center px-10 py-6 bg-gradient-to-r from-pink-400 to-rose-500 hover:from-pink-500 hover:to-rose-600 text-white text-2xl font-medium rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            >
+              <FaSearch className="mr-4 text-2xl" />
+              <span>{t('search_recipes')}</span>
+            </Link>
           </div>
         </div>
         
