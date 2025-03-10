@@ -2,12 +2,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FaSearch, FaFilter, FaLightbulb, FaSortDown, FaHeart, FaStar, FaUtensils, FaClock, FaMagic, FaCheckCircle } from 'react-icons/fa';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import { getRecipes, searchRecipesByIngredients } from '../services/recipeService';
 import RecipeCard from '../components/recipe/RecipeCard';
 import { toast } from 'react-toastify';
 
 const SearchResults = () => {
   const { t } = useLanguage();
+  const { isAuthenticated } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -28,6 +30,14 @@ const SearchResults = () => {
     duration: 'all',
     minRating: 0
   });
+
+  // Check if user is authenticated on component mount
+  useEffect(() => {
+    if (!isAuthenticated) {
+      toast.error(t('login_required'));
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate, t]);
   
   // Fetch latest recipes if no search term provided
   const fetchLatestRecipes = useCallback(async () => {
@@ -52,7 +62,6 @@ const SearchResults = () => {
     } catch (error) {
       console.error('Error fetching latest recipes:', error);
       toast.error(error || t('error_occurred'));
-      // Set empty array as fallback
       setRecipes([]);
       setTotalResults(0);
     } finally {
@@ -126,6 +135,10 @@ const SearchResults = () => {
   
   // Parse query params
   useEffect(() => {
+    if (!isAuthenticated) {
+      return; // Don't proceed if not authenticated
+    }
+    
     const queryParams = new URLSearchParams(location.search);
     const ingredientsParam = queryParams.get('ingredients');
     
@@ -172,7 +185,7 @@ const SearchResults = () => {
       // No ingredients provided, fetch latest recipes
       fetchLatestRecipes();
     }
-  }, [location.search, performSearch, fetchLatestRecipes]);
+  }, [location.search, performSearch, fetchLatestRecipes, isAuthenticated]);
   
   // Handle search form submission
   const handleSearch = (e) => {
@@ -298,6 +311,11 @@ const SearchResults = () => {
   
   // Check if we have any recipes with similarity scores
   const hasScores = recipes.some(recipe => recipe.similarityScore !== undefined);
+
+  // If not authenticated, don't render the component
+  if (!isAuthenticated) {
+    return null;
+  }
   
   return (
     <div className="min-h-screen bg-rose-50 py-8">
@@ -366,9 +384,8 @@ const SearchResults = () => {
                 <FaFilter />
                 <span>{t('filters')}</span>
               </button>
-            </div>
+              </div>
           </form>
-          
           {/* Search Ingredients Pills - Display for better UX */}
           {searchIngredients.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2">
