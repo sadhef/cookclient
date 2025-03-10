@@ -181,10 +181,10 @@ const HomePage = () => {
             {/* Large Recipe Search Button */}
             <Link
               to="/search"
-              className="inline-flex items-center px-10 py-6 bg-gradient-to-r from-pink-400 to-rose-500 hover:from-pink-500 hover:to-rose-600 text-white text-2xl font-medium rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              className="inline-flex items-center px-10 py-6 bg-gradient-to-r from-pink-400 to-rose-500 hover:from-pink-500 hover:to-rose-600 text-white text-1xl font-medium rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
             >
-              <FaSearch className="mr-4 text-2xl" />
-              <span>{t('search_recipes')}</span>
+              <FaSearch className="mr-4 text-1xl" />
+              <span>{t('Search Recipes')}</span>
             </Link>
           </div>
         </div>
