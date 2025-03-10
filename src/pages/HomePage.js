@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { FaMicrophone, FaCalculator, FaLanguage, FaHeart, FaStar, FaUtensils, FaClock, FaSearch, FaCookieBite, FaLeaf } from 'react-icons/fa';
+import { FaMicrophone, FaCalculator, FaLanguage, FaHeart, FaStar, FaUtensils, FaClock, FaSearch, FaCookieBite, FaLeaf, FaPlay, FaPause } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import RecipeCard from '../components/recipe/RecipeCard';
@@ -16,11 +16,25 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const [isVideoError, setIsVideoError] = useState(false);
+  
+  // Reference to video element for controls
+  const videoRef = useRef(null);
 
   useEffect(() => {
     // Show heart animation briefly when the page loads
     setShowHeartAnimation(true);
     setTimeout(() => setShowHeartAnimation(false), 2500);
+    
+    // Attempt to play video automatically after a short delay
+    setTimeout(() => {
+      if (videoRef.current) {
+        videoRef.current.play().catch(err => {
+          console.warn('Auto-play was prevented:', err);
+          // We don't set error state here as this is expected in some browsers
+        });
+      }
+    }, 1000);
     
     const fetchRecipes = async () => {
       try {
@@ -93,6 +107,20 @@ const HomePage = () => {
 
   const handleVideoLoad = () => {
     setVideoLoaded(true);
+    console.log("Video loaded successfully");
+    
+    // Attempt to play video after it's loaded
+    if (videoRef.current) {
+      videoRef.current.play().catch(err => {
+        console.warn('Auto-play was prevented on load:', err);
+      });
+    }
+  };
+  
+  const handleVideoError = (error) => {
+    console.error("Video error:", error);
+    setIsVideoError(true);
+    setVideoLoaded(false);
   };
 
   return (
@@ -129,25 +157,35 @@ const HomePage = () => {
       <div className="relative text-white overflow-hidden rounded-b-[50px] shadow-2xl">
         {/* Video Background with Fallback */}
         <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
+          {/* Main Video Element */}
           <video 
+            ref={videoRef}
             autoPlay 
             loop 
             muted 
             playsInline
+            controls={false}
             onLoadedData={handleVideoLoad}
+            onError={handleVideoError}
             className={`w-full h-full object-cover transition-opacity duration-1000 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}
+            style={{ minHeight: '70vh' }} // Ensure minimum height for better visibility
           >
             <source src="/IMG_9234.MOV" type="video/quicktime" />
+            <source src="/IMG_9234.mp4" type="video/mp4" /> {/* Fallback format */}
+            Your browser does not support the video tag.
           </video>
           
-          {/* Gradient fallback while video loads */}
-          <div className={`absolute inset-0 bg-gradient-to-r from-pink-400 to-rose-500 transition-opacity duration-1000 ${videoLoaded ? 'opacity-0' : 'opacity-100'}`}></div>
+          {/* Gradient fallback while video loads or if video fails */}
+          <div 
+            className={`absolute inset-0 bg-gradient-to-r from-pink-400 to-rose-500 transition-opacity duration-1000 ${videoLoaded ? 'opacity-0' : 'opacity-100'}`}
+            style={{ minHeight: '70vh' }}
+          ></div>
           
-          {/* Gradient overlay for better text visibility */}
-          <div className="absolute inset-0 bg-gradient-to-b from-pink-900/50 via-pink-800/40 to-pink-700/60"></div>
+          {/* Subtle gradient overlay for better text visibility - less opaque to let video shine */}
+          <div className="absolute inset-0 bg-gradient-to-b from-pink-900/40 via-pink-800/30 to-pink-700/40"></div>
           
-          {/* Dreamy soft vignette */}
-          <div className="absolute inset-0 shadow-[inset_0_0_120px_rgba(0,0,0,0.5)]"></div>
+          {/* Dreamy soft vignette - reduced intensity */}
+          <div className="absolute inset-0 shadow-[inset_0_0_100px_rgba(0,0,0,0.4)]"></div>
         </div>
 
         {/* Content */}
