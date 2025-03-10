@@ -22,7 +22,7 @@ const SearchResults = () => {
   const [totalResults, setTotalResults] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [sortOption, setSortOption] = useState('best_match'); // Default sort option
+  const [sortOption, setSortOption] = useState('best_match');
   const [searchAnimation, setSearchAnimation] = useState(false);
   const [searchIngredients, setSearchIngredients] = useState([]);
   const [searchCategories, setSearchCategories] = useState(null);
@@ -42,6 +42,30 @@ const SearchResults = () => {
     }
   }, [isAuthenticated, navigate, t]);
   
+  // Helper function to deduplicate recipes
+  const deduplicateRecipes = useCallback((recipeArray) => {
+    if (!recipeArray || recipeArray.length === 0) return [];
+    
+    const uniqueRecipesMap = new Map();
+    
+    recipeArray.forEach(recipe => {
+      if (!recipe || !recipe.title) return;
+      
+      const key = recipe.title.toLowerCase().trim();
+      
+      if (uniqueRecipesMap.has(key)) {
+        const existingRecipe = uniqueRecipesMap.get(key);
+        if (recipe.averageRating > existingRecipe.averageRating) {
+          uniqueRecipesMap.set(key, recipe);
+        }
+      } else {
+        uniqueRecipesMap.set(key, recipe);
+      }
+    });
+    
+    return Array.from(uniqueRecipesMap.values());
+  }, []);
+  
   // Fetch latest recipes if no search term provided
   const fetchLatestRecipes = useCallback(async () => {
     try {
@@ -51,10 +75,13 @@ const SearchResults = () => {
         limit: 15
       });
       
-      // Handle different response structures
+      // Handle different response structures and deduplicate
       if (result && result.data) {
-        setRecipes(Array.isArray(result.data) ? result.data : []);
-        setTotalResults(result.count || (Array.isArray(result.data) ? result.data.length : 0));
+        const recipeData = Array.isArray(result.data) ? result.data : [];
+        const uniqueRecipes = deduplicateRecipes(recipeData);
+        
+        setRecipes(uniqueRecipes);
+        setTotalResults(uniqueRecipes.length);
       } else {
         console.error('Unexpected response format from getRecipes:', result);
         setRecipes([]);
@@ -70,7 +97,7 @@ const SearchResults = () => {
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, [t, deduplicateRecipes]);
   
   // Search by ingredients
   const performSearch = useCallback(async (ingredients) => {
@@ -92,8 +119,11 @@ const SearchResults = () => {
       
       // Safely handle different response structures
       if (results && results.data) {
-        setRecipes(Array.isArray(results.data) ? results.data : []);
-        setTotalResults(results.count || (Array.isArray(results.data) ? results.data.length : 0));
+        const recipeData = Array.isArray(results.data) ? results.data : [];
+        const uniqueRecipes = deduplicateRecipes(recipeData);
+        
+        setRecipes(uniqueRecipes);
+        setTotalResults(uniqueRecipes.length);
         
         // Save category information if available
         if (results.categories) {
@@ -110,7 +140,9 @@ const SearchResults = () => {
       
       // Store search results in sessionStorage
       try {
-        sessionStorage.setItem('searchResults', JSON.stringify(results));
+        // Store unique recipes instead of possibly duplicate ones
+        const uniqueResults = { ...results, data: deduplicateRecipes(results.data) };
+        sessionStorage.setItem('searchResults', JSON.stringify(uniqueResults));
         sessionStorage.setItem('searchIngredients', ingredients);
         sessionStorage.setItem('parsedIngredients', JSON.stringify(ingredientsArray));
         if (results.categories) {
@@ -138,7 +170,7 @@ const SearchResults = () => {
     } finally {
       setLoading(false);
     }
-  }, [t, fetchLatestRecipes, navigate]);
+  }, [t, fetchLatestRecipes, navigate, deduplicateRecipes]);
   
   // Parse query params
   useEffect(() => {
@@ -165,8 +197,11 @@ const SearchResults = () => {
           
           const parsedResults = JSON.parse(storedResults);
           if (parsedResults && parsedResults.data) {
-            setRecipes(Array.isArray(parsedResults.data) ? parsedResults.data : []);
-            setTotalResults(parsedResults.count || (Array.isArray(parsedResults.data) ? parsedResults.data.length : 0));
+            const recipeData = Array.isArray(parsedResults.data) ? parsedResults.data : [];
+            const uniqueRecipes = deduplicateRecipes(recipeData);
+            
+            setRecipes(uniqueRecipes);
+            setTotalResults(uniqueRecipes.length);
             
             if (storedParsedIngredients) {
               try {
@@ -197,7 +232,7 @@ const SearchResults = () => {
       // No ingredients provided, fetch latest recipes
       fetchLatestRecipes();
     }
-  }, [location.search, performSearch, fetchLatestRecipes, isAuthenticated]);
+  }, [location.search, performSearch, fetchLatestRecipes, isAuthenticated, deduplicateRecipes]);
   
   // Handle search form submission
   const handleSearch = (e) => {
@@ -448,7 +483,7 @@ const SearchResults = () => {
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Sort By */}
-                <div className="bg-white p-4 rounded-xl shadow-sm">
+                <div className="bg-white p-4rounded-xl shadow-sm">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     {t('sort_by')}
                   </label>
@@ -713,81 +748,6 @@ const SearchResults = () => {
             )}
           </>
         )}
-        
-        {/* Pagination - only show if we have multiple pages */}
-        {totalResults > 0 && totalResults > 15 && (
-          <div className="flex justify-center mt-12">
-            <nav className="inline-flex rounded-md shadow-sm -space-x-px">
-              <button
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className="relative inline-flex items-center px-4 py-2 rounded-l-md border border-pink-300 bg-white text-sm font-medium text-pink-500 hover:bg-pink-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {t('previous')}
-              </button>
-              
-              {/* Page numbers */}
-              {[...Array(Math.ceil(totalResults / 15))].slice(0, 5).map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentPage(i + 1)}
-                  className={`relative inline-flex items-center px-4 py-2 border ${
-                    currentPage === i + 1
-                      ? 'bg-pink-100 border-pink-400 text-pink-600 z-10'
-                      : 'bg-white border-pink-300 text-pink-500 hover:bg-pink-50'
-                  } text-sm font-medium`}
-                >
-                  {i + 1}
-                </button>
-              ))}
-              
-              <button
-                onClick={() => setCurrentPage(prev => prev + 1)}
-                disabled={currentPage >= Math.ceil(totalResults / 15)}
-                className="relative inline-flex items-center px-4 py-2 rounded-r-md border border-pink-300 bg-white text-sm font-medium text-pink-500 hover:bg-pink-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {t('next')}
-              </button>
-            </nav>
-          </div>
-        )}
-        
-        {/* Footer section with helpful tips */}
-        <div className="mt-16 bg-white p-6 rounded-2xl shadow-md border border-pink-100">
-          <div className="flex items-center mb-4">
-            <div className="bg-pink-100 p-2 rounded-full mr-3">
-              <FaLightbulb className="text-pink-500" />
-            </div>
-            <h3 className="text-xl font-semibold text-gray-800 font-cursive">{t('search_tips')}</h3>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-600">
-            <div className="flex items-start">
-              <div className="bg-pink-50 p-2 rounded-full mr-3 mt-1">
-                <FaCheckCircle className="text-pink-400" size={14} />
-              </div>
-              <p>{t('search_tip_1')}</p>
-            </div>
-            <div className="flex items-start">
-              <div className="bg-pink-50 p-2 rounded-full mr-3 mt-1">
-                <FaCheckCircle className="text-pink-400" size={14} />
-              </div>
-              <p>{t('search_tip_2')}</p>
-            </div>
-            <div className="flex items-start">
-              <div className="bg-pink-50 p-2 rounded-full mr-3 mt-1">
-                <FaCheckCircle className="text-pink-400" size={14} />
-              </div>
-              <p>{t('search_tip_3')}</p>
-            </div>
-            <div className="flex items-start">
-              <div className="bg-pink-50 p-2 rounded-full mr-3 mt-1">
-                <FaCheckCircle className="text-pink-400" size={14} />
-              </div>
-              <p>{t('search_tip_4')}</p>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

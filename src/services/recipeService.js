@@ -23,6 +23,17 @@ export const getRecipes = async (params = {}) => {
   
   try {
     const response = await api.get(`${RECIPES_ENDPOINT}?${queryParams.toString()}`);
+    
+    // Deduplicate recipes to prevent showing the same recipe twice
+    if (response.data && response.data.data) {
+      const uniqueRecipes = deduplicateRecipes(Array.isArray(response.data.data) ? response.data.data : []);
+      return { 
+        ...response.data, 
+        data: uniqueRecipes,
+        count: uniqueRecipes.length
+      };
+    }
+    
     return response.data;
   } catch (error) {
     console.error('Error fetching recipes:', error);
@@ -84,10 +95,8 @@ export const searchRecipesByIngredients = async (ingredients) => {
     console.log(`Found ${recipesFound.length} recipes out of ${results.totalMatches} total matches`);
     console.log('Categories:', results.categories);
     
-    // If we got the categories back from the API, include them in the results
-    if (results.categories) {
-      results.categories = results.categories;
-    }
+    // Deduplicate recipes to prevent showing the same recipe twice
+    recipesFound = deduplicateRecipes(recipesFound);
     
     // Sort recipes by similarity score if available
     if (recipesFound.length > 0 && recipesFound[0].similarityScore !== undefined) {
@@ -101,9 +110,6 @@ export const searchRecipesByIngredients = async (ingredients) => {
       
       // Combine them back
       recipesFound = [...exactMatches, ...suggestedRecipes];
-      
-      // Update result data
-      results.data = recipesFound;
     }
     
     // Return the complete results
@@ -125,6 +131,41 @@ export const searchRecipesByIngredients = async (ingredients) => {
       error: error.response?.data?.error || 'Error searching recipes'
     };
   }
+};
+
+// Helper function to deduplicate recipes
+const deduplicateRecipes = (recipes) => {
+  // Return early if there are no recipes
+  if (!recipes || recipes.length === 0) {
+    return [];
+  }
+
+  // Use Map to keep track of unique recipes by title
+  const uniqueRecipesMap = new Map();
+  
+  // Process each recipe
+  recipes.forEach(recipe => {
+    if (!recipe || !recipe.title) return;
+    
+    // Create a unique key from the recipe title (normalized to lowercase, trimmed)
+    const key = recipe.title.toLowerCase().trim();
+    
+    // If we already have this recipe, only keep the one with the higher rating
+    if (uniqueRecipesMap.has(key)) {
+      const existingRecipe = uniqueRecipesMap.get(key);
+      
+      // Compare ratings and keep the higher-rated version
+      if (recipe.averageRating > existingRecipe.averageRating) {
+        uniqueRecipesMap.set(key, recipe);
+      }
+    } else {
+      // First time seeing this recipe, add it to our map
+      uniqueRecipesMap.set(key, recipe);
+    }
+  });
+  
+  // Convert the Map values back to an array
+  return Array.from(uniqueRecipesMap.values());
 };
 
 // Create a new recipe
@@ -197,12 +238,17 @@ export const getFavorites = async () => {
   try {
     const response = await api.get('/users/me/favorites');
     
-    // Ensure we return the data array
+    // Ensure we return the data array and deduplicate
     if (response && response.data) {
       if (Array.isArray(response.data)) {
-        return { data: response.data };
+        const uniqueRecipes = deduplicateRecipes(response.data);
+        return { data: uniqueRecipes };
       } else if (response.data.data && Array.isArray(response.data.data)) {
-        return { data: response.data.data, count: response.data.count || response.data.data.length };
+        const uniqueRecipes = deduplicateRecipes(response.data.data);
+        return { 
+          data: uniqueRecipes, 
+          count: uniqueRecipes.length 
+        };
       }
     }
     
