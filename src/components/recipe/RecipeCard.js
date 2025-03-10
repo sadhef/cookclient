@@ -224,7 +224,7 @@ const RecipeCard = ({
             
             {/* View Button */}
             <span className="text-primary text-sm font-medium">
-              {t('view_recipe')} →
+              {t('View Recipe')} →
             </span>
           </div>
         </div>

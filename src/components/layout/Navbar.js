@@ -1,14 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { FaUtensils, FaUser, FaSignOutAlt, FaSignInAlt, FaUserPlus, FaHeart, FaStar, FaShieldAlt, FaBars, FaTimes, FaHome, FaCookieBite, FaGlobe } from 'react-icons/fa';
+import { FaUtensils, FaUser, FaSignOutAlt, FaSignInAlt, FaUserPlus, FaHeart, FaStar, FaShieldAlt, FaBars, FaTimes, FaHome, FaCookieBite, FaGlobe, FaChevronDown } from 'react-icons/fa';
 
 const Navbar = () => {
   const { isAuthenticated, user, logout, isAdmin } = useAuth();
   const { t, currentLanguage, changeLanguage, availableLanguages } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
+  
+  const userMenuRef = useRef(null);
+  const langMenuRef = useRef(null);
   
   // Add scroll effect for shadow
   useEffect(() => {
@@ -24,17 +29,44 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   
+  // Handle clicks outside the dropdown menus to close them
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setUserMenuOpen(false);
+      }
+      if (langMenuRef.current && !langMenuRef.current.contains(event.target)) {
+        setLangMenuOpen(false);
+      }
+    }
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+  
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
+  };
+  
+  const toggleUserMenu = () => {
+    setUserMenuOpen(!userMenuOpen);
+    if (langMenuOpen) setLangMenuOpen(false);
+  };
+  
+  const toggleLangMenu = () => {
+    setLangMenuOpen(!langMenuOpen);
+    if (userMenuOpen) setUserMenuOpen(false);
   };
   
   const handleLogout = () => {
     logout();
     setMobileMenuOpen(false);
+    setUserMenuOpen(false);
   };
   
-  const handleLanguageChange = (e) => {
-    changeLanguage(e.target.value);
+  const handleLanguageChange = (langCode) => {
+    changeLanguage(langCode);
+    setLangMenuOpen(false);
   };
 
   return (
@@ -72,8 +104,12 @@ const Navbar = () => {
                   </Link>
                 )}
                 
-                <div className="relative group ml-2">
-                  <button className="flex items-center space-x-1 px-3 py-2 rounded-full bg-pink-50 hover:bg-pink-100 transition-colors border border-pink-200">
+                {/* User profile dropdown - using ref and state instead of CSS hover */}
+                <div className="relative ml-2" ref={userMenuRef}>
+                  <button 
+                    onClick={toggleUserMenu}
+                    className={`flex items-center space-x-1 px-3 py-2 rounded-full ${userMenuOpen ? 'bg-pink-100' : 'bg-pink-50'} hover:bg-pink-100 transition-colors border border-pink-200`}
+                  >
                     <div className="w-6 h-6 rounded-full bg-pink-200 flex items-center justify-center text-pink-500 mr-1">
                       {user?.avatar ? (
                         <img src={user.avatar} alt={user.name} className="w-6 h-6 rounded-full object-cover" />
@@ -82,23 +118,27 @@ const Navbar = () => {
                       )}
                     </div>
                     <span className="font-medium">{user?.name}</span>
+                    <FaChevronDown className={`ml-1 text-pink-400 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} size={12} />
                   </button>
-                  <div className="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded-xl shadow-lg py-2 z-10 hidden group-hover:block border border-pink-100 overflow-hidden">
-                    <Link 
-                      to="/profile" 
-                      className="block px-4 py-2 hover:bg-pink-50 transition-colors flex items-center space-x-2"
-                    >
-                      <FaUser className="text-pink-400" />
-                      <span>{t('profile')}</span>
-                    </Link>
-                    <button 
-                      onClick={handleLogout} 
-                      className="block w-full text-left px-4 py-2 hover:bg-pink-50 transition-colors flex items-center space-x-2"
-                    >
-                      <FaSignOutAlt className="text-pink-400" />
-                      <span>{t('logout')}</span>
-                    </button>
-                  </div>
+                  {userMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded-xl shadow-lg py-2 z-10 border border-pink-100 overflow-hidden">
+                      <Link 
+                        to="/profile" 
+                        className="block px-4 py-2 hover:bg-pink-50 transition-colors flex items-center space-x-2"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        <FaUser className="text-pink-400" />
+                        <span>{t('profile')}</span>
+                      </Link>
+                      <button 
+                        onClick={handleLogout} 
+                        className="block w-full text-left px-4 py-2 hover:bg-pink-50 transition-colors flex items-center space-x-2"
+                      >
+                        <FaSignOutAlt className="text-pink-400" />
+                        <span>{t('logout')}</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </>
             ) : (
@@ -114,25 +154,31 @@ const Navbar = () => {
               </>
             )}
             
-            {/* Language Selector */}
-            <div className="ml-2 relative group">
-              <button className="flex items-center space-x-1 px-3 py-2 rounded-full hover:bg-pink-100 transition-colors">
+            {/* Language Selector - using ref and state instead of CSS hover */}
+            <div className="ml-2 relative" ref={langMenuRef}>
+              <button 
+                onClick={toggleLangMenu}
+                className={`flex items-center space-x-1 px-3 py-2 rounded-full ${langMenuOpen ? 'bg-pink-100' : ''} hover:bg-pink-100 transition-colors`}
+              >
                 <FaGlobe className="text-pink-400" />
                 <span className="text-sm">{currentLanguage.toUpperCase()}</span>
+                <FaChevronDown className={`ml-1 text-pink-400 transition-transform ${langMenuOpen ? 'rotate-180' : ''}`} size={12} />
               </button>
-              <div className="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-lg py-2 z-10 hidden group-hover:block border border-pink-100">
-                {availableLanguages.map(lang => (
-                  <button
-                    key={lang.code}
-                    onClick={() => changeLanguage(lang.code)}
-                    className={`w-full text-left px-4 py-2 hover:bg-pink-50 transition-colors ${
-                      currentLanguage === lang.code ? 'bg-pink-50 text-pink-500 font-medium' : ''
-                    }`}
-                  >
-                    {lang.name}
-                  </button>
-                ))}
-              </div>
+              {langMenuOpen && (
+                <div className="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-lg py-2 z-10 border border-pink-100">
+                  {availableLanguages.map(lang => (
+                    <button
+                      key={lang.code}
+                      onClick={() => handleLanguageChange(lang.code)}
+                      className={`w-full text-left px-4 py-2 hover:bg-pink-50 transition-colors ${
+                        currentLanguage === lang.code ? 'bg-pink-50 text-pink-500 font-medium' : ''
+                      }`}
+                    >
+                      {lang.name}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           
@@ -234,11 +280,11 @@ const Navbar = () => {
                 </Link>
                 <Link 
                   to="/register" 
-                  className="p-3 rounded-xl hover:bg-pink-50 transition-colors flex items-center space-x-3"
+                  className="p-3 rounded-xl bg-gradient-to-r from-pink-400 to-rose-500 text-white hover:from-pink-500 hover:to-rose-600 transition-colors flex items-center space-x-3"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <div className="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center">
-                    <FaUserPlus className="text-pink-500" />
+                  <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                    <FaUserPlus className="text-white" />
                   </div>
                   <span>{t('register')}</span>
                 </Link>
@@ -264,7 +310,7 @@ const Navbar = () => {
                     className={`py-1 px-2 rounded-lg text-sm ${
                       currentLanguage === lang.code 
                         ? 'bg-pink-200 text-pink-700 font-medium' 
-                        : 'bg-white border border-pink-100'
+                        : 'bg-white border border-pink-100 hover:bg-pink-100 transition-colors'
                     }`}
                   >
                     {lang.name}
@@ -278,13 +324,8 @@ const Navbar = () => {
       
       {/* Cute little decoration at the bottom of the navbar */}
       <div className="hidden md:block h-1 bg-gradient-to-r from-pink-400 via-rose-300 to-pink-400"></div>
-      
-      {/* Add custom font style */}
-      <style jsx="true">{`
-        .font-cursive {
-          font-family: 'Comic Sans MS', cursive, sans-serif;
-        }
-      `}</style>
+
+
     </nav>
   );
 };
