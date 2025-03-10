@@ -82,6 +82,12 @@ export const searchRecipesByIngredients = async (ingredients) => {
     
     // Log how many recipes were found
     console.log(`Found ${recipesFound.length} recipes out of ${results.totalMatches} total matches`);
+    console.log('Categories:', results.categories);
+    
+    // If we got the categories back from the API, include them in the results
+    if (results.categories) {
+      results.categories = results.categories;
+    }
     
     // Sort recipes by similarity score if available
     if (recipesFound.length > 0 && recipesFound[0].similarityScore !== undefined) {
@@ -95,105 +101,29 @@ export const searchRecipesByIngredients = async (ingredients) => {
       
       // Combine them back
       recipesFound = [...exactMatches, ...suggestedRecipes];
-    }
-    
-    // If we don't have enough recipes, try a broader search
-    if (recipesFound.length < 5 && ingredientsArray.length >= 1) {
-      console.log('Not enough results, trying a broader search');
       
-      try {
-        // Try searching with just partial terms from the first ingredient
-        const words = ingredientsArray[0].split(' ');
-        const searchWord = words.find(w => w.length > 3) || ingredientsArray[0];
-        
-        console.log('Trying broader search with:', searchWord);
-        
-        const fallbackResponse = await api.post(`${RECIPES_ENDPOINT}/search`, { 
-          ingredients: [searchWord] 
-        });
-        
-        console.log('Fallback response:', fallbackResponse.data);
-        
-        let fallbackRecipes = [];
-        if (fallbackResponse?.data?.data && Array.isArray(fallbackResponse.data.data)) {
-          fallbackRecipes = fallbackResponse.data.data;
-        }
-        
-        // Add additional recipes that weren't in the original search
-        if (fallbackRecipes.length > 0) {
-          const existingIds = new Set(recipesFound.map(r => r._id));
-          const additionalRecipes = fallbackRecipes.filter(r => !existingIds.has(r._id));
-          
-          // Add enough additional recipes to get to at least 15 total
-          const neededRecipes = Math.max(0, 15 - recipesFound.length);
-          const recipesToAdd = additionalRecipes.slice(0, neededRecipes);
-          
-          console.log(`Adding ${recipesToAdd.length} more recipes from fallback search`);
-          
-          // Mark these as suggested
-          const flaggedRecipes = recipesToAdd.map(recipe => ({
-            ...recipe,
-            isSuggested: true
-          }));
-          
-          recipesFound = [...recipesFound, ...flaggedRecipes];
-          
-          // Update result count
-          results.count = recipesFound.length;
-          results.data = recipesFound;
-        }
-      } catch (error) {
-        console.error('Error in fallback search:', error);
-      }
+      // Update result data
+      results.data = recipesFound;
     }
     
-    // Final fallback to popular recipes if still not enough
-    if (recipesFound.length < 15) {
-      console.log('Still not enough recipes, fetching popular recipes');
-      
-      try {
-        const popularResponse = await getRecipes({
-          sort: '-averageRating',
-          limit: 15
-        });
-        
-        if (popularResponse?.data && Array.isArray(popularResponse.data)) {
-          const existingIds = new Set(recipesFound.map(r => r._id));
-          const additionalRecipes = popularResponse.data.filter(r => !existingIds.has(r._id));
-          
-          // Add enough additional recipes to get to at least 15 total
-          const neededRecipes = Math.max(0, 15 - recipesFound.length);
-          const recipesToAdd = additionalRecipes.slice(0, neededRecipes);
-          
-          console.log(`Adding ${recipesToAdd.length} popular recipes as fallback`);
-          
-          // Mark these as suggested
-          const suggestedRecipes = recipesToAdd.map(recipe => ({
-            ...recipe,
-            isSuggested: true
-          }));
-          
-          recipesFound = [...recipesFound, ...suggestedRecipes];
-          
-          // Update result count
-          results.count = recipesFound.length;
-          results.data = recipesFound;
-        }
-      } catch (error) {
-        console.error('Error fetching popular recipes:', error);
-      }
-    }
-    
-    console.log(`Final result: ${recipesFound.length} recipes`);
+    // Return the complete results
     return {
       success: true,
       count: recipesFound.length,
+      totalMatches: results.totalMatches || recipesFound.length,
+      categories: results.categories,
       data: recipesFound
     };
   } catch (error) {
     console.error('Error searching recipes by ingredients:', error);
+    
     // Return empty array as fallback
-    return { data: [], count: 0 };
+    return { 
+      success: false,
+      count: 0,
+      data: [],
+      error: error.response?.data?.error || 'Error searching recipes'
+    };
   }
 };
 

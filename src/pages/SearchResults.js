@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { FaSearch, FaFilter, FaLightbulb, FaSortDown, FaHeart, FaStar, FaUtensils, FaClock, FaMagic, FaCheckCircle } from 'react-icons/fa';
+import { 
+  FaSearch, FaFilter, FaLightbulb, FaSortDown, FaHeart, FaStar, 
+  FaUtensils, FaClock, FaMagic, FaCheckCircle, FaThumbsUp
+} from 'react-icons/fa';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { getRecipes, searchRecipesByIngredients } from '../services/recipeService';
@@ -19,10 +22,10 @@ const SearchResults = () => {
   const [totalResults, setTotalResults] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [hasSuggestedRecipes, setHasSuggestedRecipes] = useState(false);
   const [sortOption, setSortOption] = useState('best_match'); // Default sort option
   const [searchAnimation, setSearchAnimation] = useState(false);
   const [searchIngredients, setSearchIngredients] = useState([]);
+  const [searchCategories, setSearchCategories] = useState(null);
   
   // Filter states
   const [filters, setFilters] = useState({
@@ -57,8 +60,8 @@ const SearchResults = () => {
         setRecipes([]);
         setTotalResults(0);
       }
-      setHasSuggestedRecipes(false);
       setSearchIngredients([]);
+      setSearchCategories(null);
     } catch (error) {
       console.error('Error fetching latest recipes:', error);
       toast.error(error || t('error_occurred'));
@@ -87,29 +90,32 @@ const SearchResults = () => {
       
       const results = await searchRecipesByIngredients(ingredientsArray);
       
-      // Check if there are any suggested recipes
-      let hasSuggested = false;
-      if (results && results.data && Array.isArray(results.data)) {
-        hasSuggested = results.data.some(recipe => recipe.isSuggested);
-      }
-      setHasSuggestedRecipes(hasSuggested);
-      
       // Safely handle different response structures
       if (results && results.data) {
         setRecipes(Array.isArray(results.data) ? results.data : []);
         setTotalResults(results.count || (Array.isArray(results.data) ? results.data.length : 0));
+        
+        // Save category information if available
+        if (results.categories) {
+          setSearchCategories(results.categories);
+        } else {
+          setSearchCategories(null);
+        }
       } else {
         console.error('Unexpected response format from searchRecipesByIngredients:', results);
         setRecipes([]);
         setTotalResults(0);
+        setSearchCategories(null);
       }
       
       // Store search results in sessionStorage
       try {
         sessionStorage.setItem('searchResults', JSON.stringify(results));
         sessionStorage.setItem('searchIngredients', ingredients);
-        sessionStorage.setItem('hasSuggestedRecipes', JSON.stringify(hasSuggested));
         sessionStorage.setItem('parsedIngredients', JSON.stringify(ingredientsArray));
+        if (results.categories) {
+          sessionStorage.setItem('searchCategories', JSON.stringify(results.categories));
+        }
       } catch (storageError) {
         console.error('Error storing search results in sessionStorage:', storageError);
       }
@@ -126,6 +132,7 @@ const SearchResults = () => {
       setTotalResults(0);
       setSearchAnimation(false);
       setSearchIngredients([]);
+      setSearchCategories(null);
       
       navigate(`/search?ingredients=${encodeURIComponent(ingredients)}`);
     } finally {
@@ -150,8 +157,8 @@ const SearchResults = () => {
       try {
         const storedResults = sessionStorage.getItem('searchResults');
         const storedIngredients = sessionStorage.getItem('searchIngredients');
-        const storedHasSuggested = sessionStorage.getItem('hasSuggestedRecipes');
         const storedParsedIngredients = sessionStorage.getItem('parsedIngredients');
+        const storedCategories = sessionStorage.getItem('searchCategories');
         
         if (storedResults && storedIngredients) {
           setSearchTerm(storedIngredients);
@@ -161,16 +168,21 @@ const SearchResults = () => {
             setRecipes(Array.isArray(parsedResults.data) ? parsedResults.data : []);
             setTotalResults(parsedResults.count || (Array.isArray(parsedResults.data) ? parsedResults.data.length : 0));
             
-            if (storedHasSuggested) {
-              setHasSuggestedRecipes(JSON.parse(storedHasSuggested));
-            }
-            
             if (storedParsedIngredients) {
               try {
                 setSearchIngredients(JSON.parse(storedParsedIngredients));
               } catch (e) {
                 console.error('Error parsing stored ingredients array:', e);
                 setSearchIngredients([]);
+              }
+            }
+            
+            if (storedCategories) {
+              try {
+                setSearchCategories(JSON.parse(storedCategories));
+              } catch (e) {
+                console.error('Error parsing stored categories:', e);
+                setSearchCategories(null);
               }
             }
             
@@ -210,17 +222,18 @@ const SearchResults = () => {
     
     if (option === 'best_match') {
       // Sort by similarity score (matching recipes first, then by score)
-      const exactMatches = sortedRecipes.filter(r => !r.isSuggested);
-      const suggestedRecipes = sortedRecipes.filter(r => r.isSuggested);
-      
-      exactMatches.sort((a, b) => {
+      sortedRecipes.sort((a, b) => {
+        // First prioritize non-suggested over suggested
+        if (a.isSuggested !== b.isSuggested) {
+          return a.isSuggested ? 1 : -1;
+        }
+        
+        // Then by similarity score
         if (a.similarityScore !== undefined && b.similarityScore !== undefined) {
           return b.similarityScore - a.similarityScore;
         }
         return 0;
       });
-      
-      sortedRecipes = [...exactMatches, ...suggestedRecipes];
     } 
     else if (option === 'highest_rated') {
       // Sort by average rating
@@ -305,8 +318,19 @@ const SearchResults = () => {
     return t('all_recipes');
   };
   
-  // Group recipes into matched and suggested
-  const exactMatchRecipes = recipes.filter(recipe => !recipe.isSuggested);
+  // Group recipes into match categories
+  const exactMatchRecipes = recipes.filter(recipe => 
+    !recipe.isSuggested && recipe.similarityScore >= 0.9
+  );
+  
+  const goodMatchRecipes = recipes.filter(recipe => 
+    !recipe.isSuggested && recipe.similarityScore >= 0.7 && recipe.similarityScore < 0.9
+  );
+  
+  const partialMatchRecipes = recipes.filter(recipe => 
+    !recipe.isSuggested && recipe.similarityScore < 0.7
+  );
+  
   const suggestedRecipes = recipes.filter(recipe => recipe.isSuggested);
   
   // Check if we have any recipes with similarity scores
@@ -474,18 +498,18 @@ const SearchResults = () => {
                 </div>
               </div>
               
-              <div className="mt-8 flex justify-end space-x-3">
+              <div className="mt-6 flex justify-end space-x-3">
                 <button
                   type="button"
                   onClick={resetFilters}
-                  className="px-6 py-3 border border-pink-300 rounded-full text-pink-500 bg-white hover:bg-pink-50 transition-all duration-300"
+                  className="px-4 py-2 border border-pink-300 rounded-full text-pink-500 bg-white hover:bg-pink-50 transition-all duration-300"
                 >
                   {t('reset')}
                 </button>
                 <button
                   type="button"
                   onClick={applyFilters}
-                  className="px-6 py-3 bg-gradient-to-r from-pink-400 to-rose-500 text-white rounded-full hover:from-pink-500 hover:to-rose-600 transition-all duration-300 shadow-md"
+                  className="px-4 py-2 bg-gradient-to-r from-pink-400 to-rose-500 text-white rounded-full hover:from-pink-500 hover:to-rose-600 transition-all duration-300 shadow-md"
                 >
                   {t('apply_filters')}
                 </button>
@@ -524,6 +548,42 @@ const SearchResults = () => {
           </div>
         </div>
         
+        {/* Search Categories Summary - display only when search has categories */}
+        {searchCategories && searchIngredients.length > 0 && (
+          <div className="bg-white p-4 rounded-2xl shadow-md border border-pink-100 mb-6">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-gray-600 font-medium">Match breakdown:</span>
+              
+              {searchCategories.perfectMatches > 0 && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-700 font-medium">
+                  <FaCheckCircle className="mr-1" />
+                  {searchCategories.perfectMatches} Perfect
+                </span>
+              )}
+              
+              {searchCategories.highMatches > 0 && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-700 font-medium">
+                  <FaThumbsUp className="mr-1" />
+                  {searchCategories.highMatches} High
+                </span>
+              )}
+              
+              {searchCategories.goodMatches > 0 && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-yellow-100 text-yellow-700 font-medium">
+                  {searchCategories.goodMatches} Good
+                </span>
+              )}
+              
+              {searchCategories.suggestedRecipes > 0 && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-pink-100 text-pink-700 font-medium">
+                  <FaLightbulb className="mr-1" />
+                  {searchCategories.suggestedRecipes} Suggested
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+        
         {/* Results Grid */}
         {loading && !searchAnimation ? (
           <div className="flex justify-center items-center py-16">
@@ -549,19 +609,17 @@ const SearchResults = () => {
           </div>
         ) : (
           <>
-            {/* Exact match recipes */}
+            {/* Perfect match recipes - these are exact matches with all ingredients */}
             {exactMatchRecipes.length > 0 && (
               <div className="mb-12">
-                {hasSuggestedRecipes && (
-                  <div className="flex items-center mb-6">
-                    <div className="bg-pink-100 p-3 rounded-full mr-3">
-                      <FaCheckCircle className="text-pink-500" />
-                    </div>
-                    <h2 className="text-2xl font-semibold text-gray-800 font-cursive">
-                      {t('exact_matches')}
-                    </h2>
+                <div className="flex items-center mb-6">
+                  <div className="bg-green-100 p-3 rounded-full mr-3">
+                    <FaCheckCircle className="text-green-500" />
                   </div>
-                )}
+                  <h2 className="text-2xl font-semibold text-gray-800 font-cursive">
+                    {t('perfect_matches')}
+                  </h2>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {exactMatchRecipes.map(recipe => (
                     <div key={recipe._id} className="transform hover:scale-105 transition-transform duration-300">
@@ -576,25 +634,23 @@ const SearchResults = () => {
               </div>
             )}
             
-            {/* Suggested recipes */}
-            {suggestedRecipes.length > 0 && (
-              <div className="mt-16 bg-gradient-to-b from-white to-rose-100 py-12 px-8 rounded-3xl shadow-lg">
+            {/* Good match recipes - these match most of the ingredients */}
+            {goodMatchRecipes.length > 0 && (
+              <div className="mb-12">
                 <div className="flex items-center mb-6">
-                  <div className="text-yellow-500 bg-yellow-100 p-3 rounded-full mr-3">
-                    <FaLightbulb />
+                  <div className="bg-blue-100 p-3 rounded-full mr-3">
+                    <FaThumbsUp className="text-blue-500" />
                   </div>
                   <h2 className="text-2xl font-semibold text-gray-800 font-cursive">
-                    {t('suggested_recipes')}
+                    {t('good_matches')}
                   </h2>
                 </div>
-                <p className="text-gray-600 mb-8 max-w-3xl">
-                  {t('suggested_recipes_description')}
-                </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {suggestedRecipes.map(recipe => (
+                  {goodMatchRecipes.map(recipe => (
                     <div key={recipe._id} className="transform hover:scale-105 transition-transform duration-300">
                       <RecipeCard 
-                        recipe={recipe}
+                        recipe={recipe} 
+                        showSimilarityScore={hasScores}
                         searchIngredients={searchIngredients}
                       />
                     </div>
@@ -603,32 +659,135 @@ const SearchResults = () => {
               </div>
             )}
             
-            {/* Pagination - cute version */}
-            {totalResults > 15 && (
-              <div className="mt-16 flex justify-center">
-                <nav className="inline-flex rounded-full shadow-md overflow-hidden">
-                  <button
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                    className="relative inline-flex items-center px-6 py-3 border-r border-pink-200 bg-white text-sm font-medium text-pink-500 hover:bg-pink-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300"
-                  >
-                    {t('previous')}
-                  </button>
-                  <div className="bg-pink-100 px-4 flex items-center text-pink-600 font-medium">
-                    {currentPage} / {Math.ceil(totalResults / 15)}
+            {/* Partial match recipes - these match some of the ingredients */}
+            {partialMatchRecipes.length > 0 && (
+              <div className="mb-12">
+                <div className="flex items-center mb-6">
+                  <div className="bg-yellow-100 p-3 rounded-full mr-3">
+                    <FaUtensils className="text-yellow-500" />
                   </div>
-                  <button
-                    onClick={() => setCurrentPage(prev => prev + 1)}
-                    disabled={currentPage * 15 >= totalResults}
-                    className="relative inline-flex items-center px-6 py-3 border-l border-pink-200 bg-white text-sm font-medium text-pink-500 hover:bg-pink-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300"
-                  >
-                    {t('next')}
-                  </button>
-                </nav>
+                  <h2 className="text-2xl font-semibold text-gray-800 font-cursive">
+                    {t('partial_matches')}
+                  </h2>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {partialMatchRecipes.map(recipe => (
+                    <div key={recipe._id} className="transform hover:scale-105 transition-transform duration-300">
+                      <RecipeCard 
+                        recipe={recipe} 
+                        showSimilarityScore={hasScores}
+                        searchIngredients={searchIngredients}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Suggested recipes - when no exact matches, show recommendations */}
+            {suggestedRecipes.length > 0 && (
+              <div className="mb-12">
+                <div className="flex items-center mb-6">
+                  <div className="bg-pink-100 p-3 rounded-full mr-3">
+                    <FaLightbulb className="text-pink-500" />
+                  </div>
+                  <h2 className="text-2xl font-semibold text-gray-800 font-cursive">
+                    {t('suggested_recipes')}
+                  </h2>
+                  <span className="ml-3 text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                    {t('based_on_popularity')}
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {suggestedRecipes.map(recipe => (
+                    <div key={recipe._id} className="transform hover:scale-105 transition-transform duration-300">
+                      <RecipeCard 
+                        recipe={recipe} 
+                        isSuggested={true}
+                        searchIngredients={searchIngredients}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </>
         )}
+        
+        {/* Pagination - only show if we have multiple pages */}
+        {totalResults > 0 && totalResults > 15 && (
+          <div className="flex justify-center mt-12">
+            <nav className="inline-flex rounded-md shadow-sm -space-x-px">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="relative inline-flex items-center px-4 py-2 rounded-l-md border border-pink-300 bg-white text-sm font-medium text-pink-500 hover:bg-pink-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {t('previous')}
+              </button>
+              
+              {/* Page numbers */}
+              {[...Array(Math.ceil(totalResults / 15))].slice(0, 5).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`relative inline-flex items-center px-4 py-2 border ${
+                    currentPage === i + 1
+                      ? 'bg-pink-100 border-pink-400 text-pink-600 z-10'
+                      : 'bg-white border-pink-300 text-pink-500 hover:bg-pink-50'
+                  } text-sm font-medium`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+              
+              <button
+                onClick={() => setCurrentPage(prev => prev + 1)}
+                disabled={currentPage >= Math.ceil(totalResults / 15)}
+                className="relative inline-flex items-center px-4 py-2 rounded-r-md border border-pink-300 bg-white text-sm font-medium text-pink-500 hover:bg-pink-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {t('next')}
+              </button>
+            </nav>
+          </div>
+        )}
+        
+        {/* Footer section with helpful tips */}
+        <div className="mt-16 bg-white p-6 rounded-2xl shadow-md border border-pink-100">
+          <div className="flex items-center mb-4">
+            <div className="bg-pink-100 p-2 rounded-full mr-3">
+              <FaLightbulb className="text-pink-500" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-800 font-cursive">{t('search_tips')}</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-600">
+            <div className="flex items-start">
+              <div className="bg-pink-50 p-2 rounded-full mr-3 mt-1">
+                <FaCheckCircle className="text-pink-400" size={14} />
+              </div>
+              <p>{t('search_tip_1')}</p>
+            </div>
+            <div className="flex items-start">
+              <div className="bg-pink-50 p-2 rounded-full mr-3 mt-1">
+                <FaCheckCircle className="text-pink-400" size={14} />
+              </div>
+              <p>{t('search_tip_2')}</p>
+            </div>
+            <div className="flex items-start">
+              <div className="bg-pink-50 p-2 rounded-full mr-3 mt-1">
+                <FaCheckCircle className="text-pink-400" size={14} />
+              </div>
+              <p>{t('search_tip_3')}</p>
+            </div>
+            <div className="flex items-start">
+              <div className="bg-pink-50 p-2 rounded-full mr-3 mt-1">
+                <FaCheckCircle className="text-pink-400" size={14} />
+              </div>
+              <p>{t('search_tip_4')}</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
