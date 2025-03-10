@@ -36,7 +36,10 @@ const IngredientSearchBox = ({ ingredients, setIngredients, onSearch, loading })
     setSelectedSuggestions([...selectedSuggestions, ingredient]);
 
     // Add to the search input
-    let currentIngredients = ingredients.split(',').map(i => i.trim()).filter(Boolean);
+    let currentIngredients = ingredients ? 
+      ingredients.split(',').map(i => i.trim()).filter(Boolean) : 
+      [];
+    
     currentIngredients.push(ingredient);
     setIngredients(currentIngredients.join(', '));
   };
@@ -46,7 +49,10 @@ const IngredientSearchBox = ({ ingredients, setIngredients, onSearch, loading })
     setSelectedSuggestions(selectedSuggestions.filter(i => i !== ingredient));
     
     // Remove from the search input
-    let currentIngredients = ingredients.split(',').map(i => i.trim()).filter(Boolean);
+    let currentIngredients = ingredients ? 
+      ingredients.split(',').map(i => i.trim()).filter(Boolean) : 
+      [];
+    
     currentIngredients = currentIngredients.filter(i => i !== ingredient);
     setIngredients(currentIngredients.join(', '));
   };
@@ -154,6 +160,52 @@ const HomePage = () => {
       try {
         setLoading(true);
         
+        // Create fallback recipes in case API fails
+        const fallbackRecipes = [
+          {
+            _id: 'fallback1',
+            title: 'Italian Pasta',
+            description: 'A delicious homemade pasta with rich tomato sauce',
+            image: '/default-recipe.jpg', // Using relative path
+            totalTime: '30 minutes',
+            averageRating: 4.5,
+            ratingCount: 10,
+            nutrition: {
+              calories: { value: 450 },
+              protein: { value: 15 },
+              carbs: { value: 65 }
+            }
+          },
+          {
+            _id: 'fallback2',
+            title: 'Garden Salad',
+            description: 'Fresh vegetables with a zesty dressing',
+            image: '/default-recipe.jpg',
+            totalTime: '15 minutes',
+            averageRating: 4.2,
+            ratingCount: 8,
+            nutrition: {
+              calories: { value: 220 },
+              protein: { value: 5 },
+              carbs: { value: 20 }
+            }
+          },
+          {
+            _id: 'fallback3',
+            title: 'Chocolate Cake',
+            description: 'Rich and moist chocolate cake for dessert',
+            image: '/default-recipe.jpg',
+            totalTime: '45 minutes',
+            averageRating: 4.8,
+            ratingCount: 15,
+            nutrition: {
+              calories: { value: 380 },
+              protein: { value: 6 },
+              carbs: { value: 48 }
+            }
+          }
+        ];
+        
         // Fetch top rated recipes
         try {
           // Set a timeout for this specific fetch
@@ -171,11 +223,13 @@ const HomePage = () => {
           // Handle different response formats
           if (topRatedResponse && topRatedResponse.data) {
             const topRatedData = topRatedResponse.data.data || topRatedResponse.data;
-            setTopRatedRecipes(Array.isArray(topRatedData) ? topRatedData : []);
+            setTopRatedRecipes(Array.isArray(topRatedData) && topRatedData.length > 0 ? topRatedData : fallbackRecipes);
+          } else {
+            setTopRatedRecipes(fallbackRecipes);
           }
         } catch (error) {
           console.error('Error fetching top rated recipes:', error);
-          setTopRatedRecipes([]);
+          setTopRatedRecipes(fallbackRecipes);
         }
         
         // Fetch latest recipes
@@ -195,16 +249,63 @@ const HomePage = () => {
           // Handle different response formats
           if (latestResponse && latestResponse.data) {
             const latestData = latestResponse.data.data || latestResponse.data;
-            setLatestRecipes(Array.isArray(latestData) ? latestData : []);
+            setLatestRecipes(Array.isArray(latestData) && latestData.length > 0 ? latestData : fallbackRecipes);
+          } else {
+            setLatestRecipes(fallbackRecipes);
           }
         } catch (error) {
           console.error('Error fetching latest recipes:', error);
-          setLatestRecipes([]);
+          setLatestRecipes(fallbackRecipes);
         }
       } catch (error) {
         console.error('Failed to fetch recipes:', error);
-        setTopRatedRecipes([]);
-        setLatestRecipes([]);
+        // Define fallback recipes again here to avoid the ESLint error
+        const fallbackRecipes = [
+          {
+            _id: 'fallback1',
+            title: 'Italian Pasta',
+            description: 'A delicious homemade pasta with rich tomato sauce',
+            image: '/default-recipe.jpg',
+            totalTime: '30 minutes',
+            averageRating: 4.5,
+            ratingCount: 10,
+            nutrition: {
+              calories: { value: 450 },
+              protein: { value: 15 },
+              carbs: { value: 65 }
+            }
+          },
+          {
+            _id: 'fallback2',
+            title: 'Garden Salad',
+            description: 'Fresh vegetables with a zesty dressing',
+            image: '/default-recipe.jpg',
+            totalTime: '15 minutes',
+            averageRating: 4.2,
+            ratingCount: 8,
+            nutrition: {
+              calories: { value: 220 },
+              protein: { value: 5 },
+              carbs: { value: 20 }
+            }
+          },
+          {
+            _id: 'fallback3',
+            title: 'Chocolate Cake',
+            description: 'Rich and moist chocolate cake for dessert',
+            image: '/default-recipe.jpg',
+            totalTime: '45 minutes',
+            averageRating: 4.8,
+            ratingCount: 15,
+            nutrition: {
+              calories: { value: 380 },
+              protein: { value: 6 },
+              carbs: { value: 48 }
+            }
+          }
+        ];
+        setTopRatedRecipes(fallbackRecipes);
+        setLatestRecipes(fallbackRecipes);
       } finally {
         setLoading(false);
       }
@@ -216,7 +317,7 @@ const HomePage = () => {
   const handleSearch = async (e) => {
     e.preventDefault();
     
-    if (!ingredients.trim()) {
+    if (!ingredients || !ingredients.trim()) {
       toast.info(t('enter_ingredients'));
       return;
     }
@@ -224,32 +325,29 @@ const HomePage = () => {
     try {
       setSearchLoading(true);
       
-      // Prepare ingredients array
+      // Show heart animation
+      setShowHeartAnimation(true);
+      setTimeout(() => setShowHeartAnimation(false), 1500);
+      
+      // Search directly if fewer than 5 ingredients
       const ingredientsArray = ingredients.split(',').map(i => i.trim()).filter(Boolean);
       
-      // If we have ingredients, search for recipes
       if (ingredientsArray.length > 0) {
         try {
-          // Show animation effect
-          setShowHeartAnimation(true);
-          setTimeout(() => setShowHeartAnimation(false), 1500);
-          
-          // Call search API
           const searchResults = await searchRecipesByIngredients(ingredientsArray);
           
-          // Store search data in sessionStorage
+          // Store search results in sessionStorage
           sessionStorage.setItem('searchResults', JSON.stringify(searchResults.data || searchResults));
           sessionStorage.setItem('searchIngredients', ingredients);
           sessionStorage.setItem('parsedIngredients', JSON.stringify(ingredientsArray));
           
-          // Navigate to results page
           navigate('/search');
         } catch (error) {
           console.error('Search error:', error);
           navigate(`/search?ingredients=${encodeURIComponent(ingredients)}`);
         }
       } else {
-        // If no valid ingredients, just navigate with query params
+        // Just pass to search page with query params
         navigate(`/search?ingredients=${encodeURIComponent(ingredients)}`);
       }
     } catch (error) {
@@ -293,7 +391,7 @@ const HomePage = () => {
         {/* Video Background with enhanced presentation */}
         <div className="absolute inset-0 w-full h-full z-0">
           {/* Fallback background if video fails to load */}
-          <div className="absolute inset-0 bg-gradient-to-r from-gray-800 to-gray-900"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-rose-500 to-pink-600"></div>
           
           {/* Professional gradient overlay for better text visibility and premium feel */}
           <div className="absolute inset-0 bg-gradient-to-br from-black/50 via-black/40 to-black/60"></div>
