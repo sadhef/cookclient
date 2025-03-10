@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { FaMicrophone, FaCalculator, FaLanguage, FaHeart, FaStar, FaUtensils, FaClock, FaSearch, FaCookieBite, FaLeaf } from 'react-icons/fa';
+import { FaMicrophone, FaCalculator, FaLanguage, FaHeart, FaStar, FaUtensils, FaClock, FaCookieBite, FaLeaf } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import RecipeCard from '../components/recipe/RecipeCard';
 import { getRecipes } from '../services/recipeService';
-import { toast } from 'react-toastify';
 
 const HomePage = () => {
   const { t } = useLanguage();
@@ -110,12 +109,6 @@ const HomePage = () => {
     setVideoLoaded(false);
   };
 
-  const handleSearchClick = () => {
-    if (!isAuthenticated) {
-      toast.info(t('login_required'));
-    }
-  };
-
   return (
     <div className="min-h-screen bg-rose-50">
       {/* Floating decorative elements */}
@@ -172,31 +165,13 @@ const HomePage = () => {
               </div>
             </div>
             
-            <h1 className="text-5xl md:text-7xl font-bold mb-8 font-cursive text-pink drop-shadow-lg">
+            <h1 className="text-5xl md:text-7xl font-bold mb-8 font-cursive text-white drop-shadow-lg">
               {t('app_name')}
             </h1>
             
-            <p className="text-xl md:text-2xl mb-10 text-pink/90 drop-shadow-md font-light max-w-2xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl mb-16 text-white/90 drop-shadow-md font-light max-w-2xl mx-auto leading-relaxed">
               {t('welcome_text')}
             </p>
-            
-            {/* Search Button */}
-            <div className="mb-12 transform hover:scale-105 transition-transform duration-300">
-              {isAuthenticated ? (
-                <Link to="/search" className="py-5 px-10 bg-gradient-to-r from-pink-400 to-rose-500 text-white font-medium rounded-full hover:from-pink-500 hover:to-rose-600 focus:outline-none focus:ring-4 focus:ring-pink-300 focus:ring-opacity-50 shadow-lg transition-all duration-300 inline-flex items-center space-x-3">
-                  <FaSearch className="text-xl" />
-                  <span className="text-lg">Search Recipes</span>
-                </Link>
-              ) : (
-                <button 
-                  onClick={handleSearchClick} 
-                  className="py-5 px-10 bg-gradient-to-r from-pink-400 to-rose-500 text-white font-medium rounded-full hover:from-pink-500 hover:to-rose-600 focus:outline-none focus:ring-4 focus:ring-pink-300 focus:ring-opacity-50 shadow-lg transition-all duration-300 inline-flex items-center space-x-3"
-                >
-                  <FaSearch className="text-xl" />
-                  <span className="text-lg">Search Recipes</span>
-                </button>
-              )}
-            </div>
             
             {/* Features Cards - With properly aligned text */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-10">
