@@ -14,10 +14,15 @@ const HomePage = () => {
   const [topRatedRecipes, setTopRatedRecipes] = useState([]);
   const [latestRecipes, setLatestRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showHeartAnimation, setShowHeartAnimation] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const videoRef = useRef(null);
 
   useEffect(() => {
+    // Show heart animation briefly when the page loads
+    setShowHeartAnimation(true);
+    setTimeout(() => setShowHeartAnimation(false), 2500);
+    
     // Setup video element and ensure it plays properly
     if (videoRef.current) {
       // Check if video is ready
@@ -95,6 +100,7 @@ const HomePage = () => {
     if (videoRef.current) {
       videoRef.current.play().catch(err => {
         console.warn('Video autoplay was prevented:', err);
+        // Some browsers prevent autoplay, we'll handle it gracefully
       });
     }
   };
@@ -134,9 +140,21 @@ const HomePage = () => {
         </div>
       </div>
 
+      {/* Welcome heart animation */}
+      {showHeartAnimation && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+          <div className="animate-float-up-and-fade text-center">
+            <FaHeart className="text-pink-500 mx-auto mb-4" size={80} />
+            <p className="text-pink-600 font-cursive text-xl bg-white/80 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg">
+              {t('welcome_to')} {t('app_name')}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Hero Section with Video Background */}
       <div className="relative text-white overflow-hidden rounded-b-[50px] shadow-2xl">
-        {/* Video Background Container */}
+        {/* Video Background Container - Critical for correct sizing */}
         <div className="absolute inset-0 w-full h-full z-0 overflow-hidden" style={{ minHeight: '80vh' }}>
           {/* Main Video Element */}
           <video 
@@ -150,7 +168,7 @@ const HomePage = () => {
             className={`w-full h-full object-cover transition-opacity duration-1000 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}
           >
             <source src="/IMG_9234.MOV" type="video/quicktime" />
-            <source src="/IMG_9234.mp4" type="video/mp4" /> 
+            <source src="/IMG_9234.MOV" type="video/mp4" /> {/* Fallback format */}
             Your browser does not support the video tag.
           </video>
           
@@ -159,15 +177,15 @@ const HomePage = () => {
             className={`absolute inset-0 bg-gradient-to-r from-pink-400 to-rose-500 transition-opacity duration-1000 ${videoLoaded ? 'opacity-0' : 'opacity-100'}`}
           ></div>
           
-          {/* Light gradient overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/40"></div>
+          {/* Light gradient overlay for text readability - keep this minimal */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/30"></div>
         </div>
 
         {/* Content - Positioned over the video */}
         <div className="container mx-auto px-4 relative z-10 pt-24 pb-36">
           <div className="max-w-3xl mx-auto text-center">
-            <div className="mb-6">
-              <div className="bg-white/30 backdrop-blur-md p-5 rounded-full inline-block">
+            <div className="animate-float inline-block mb-6">
+              <div className="bg-white/30 backdrop-blur-md p-5 rounded-full">
                 <FaUtensils className="text-white text-5xl mx-auto drop-shadow-lg" />
               </div>
             </div>
@@ -180,7 +198,7 @@ const HomePage = () => {
               {t('welcome_text')}
             </p>
             
-            {/* Search Button */}
+            {/* Search Button - Enhanced with animation */}
             <div className="mb-12 transform hover:scale-105 transition-transform duration-300">
               {isAuthenticated ? (
                 <Link to="/search" className="py-5 px-10 bg-gradient-to-r from-pink-400 to-rose-500 text-white font-medium rounded-full hover:from-pink-500 hover:to-rose-600 focus:outline-none focus:ring-4 focus:ring-pink-300 focus:ring-opacity-50 shadow-lg transition-all duration-300 inline-flex items-center space-x-3">
@@ -198,34 +216,34 @@ const HomePage = () => {
               )}
             </div>
             
-            {/* Features Cards - With properly aligned text */}
+            {/* Features Cards - Enhanced with better hover effects */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-10">
-              <div className="bg-white/30 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/50 transform hover:scale-105 transition-all duration-300 hover:bg-white/40 group h-full flex flex-col items-center">
-                <div className="text-white text-3xl mb-5 bg-pink-500/60 p-5 rounded-full w-20 h-20 flex items-center justify-center shadow-md group-hover:bg-pink-500/80 transition-all duration-300">
+              <div className="bg-white/30 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/50 transform hover:scale-105 transition-all duration-300 hover:bg-white/40 group">
+                <div className="text-white text-3xl mb-5 bg-pink-500/60 p-5 rounded-full w-20 h-20 flex items-center justify-center mx-auto shadow-md group-hover:bg-pink-500/80 transition-all duration-300">
                   <FaMicrophone className="mx-auto" />
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-center group-hover:text-white/100 text-white/90 transition-colors duration-300">Voice Control</h3>
-                <p className="text-white/80 text-center group-hover:text-white/100 transition-colors duration-300">
+                <h3 className="text-xl font-semibold mb-3 group-hover:text-white/100 text-white/90 transition-colors duration-300">{t('voice_control')}</h3>
+                <p className="text-white/80 text-base group-hover:text-white/100 transition-colors duration-300">
                   Hands-free cooking assistance with voice commands
                 </p>
               </div>
               
-              <div className="bg-white/30 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/50 transform hover:scale-105 transition-all duration-300 hover:bg-white/40 group h-full flex flex-col items-center">
-                <div className="text-white text-3xl mb-5 bg-pink-500/60 p-5 rounded-full w-20 h-20 flex items-center justify-center shadow-md group-hover:bg-pink-500/80 transition-all duration-300">
+              <div className="bg-white/30 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/50 transform hover:scale-105 transition-all duration-300 hover:bg-white/40 group">
+                <div className="text-white text-3xl mb-5 bg-pink-500/60 p-5 rounded-full w-20 h-20 flex items-center justify-center mx-auto shadow-md group-hover:bg-pink-500/80 transition-all duration-300">
                   <FaCalculator className="mx-auto" />
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-center group-hover:text-white/100 text-white/90 transition-colors duration-300">Nutrition Calculator</h3>
-                <p className="text-white/80 text-center group-hover:text-white/100 transition-colors duration-300">
+                <h3 className="text-xl font-semibold mb-3 group-hover:text-white/100 text-white/90 transition-colors duration-300">{t('nutrition_calc')}</h3>
+                <p className="text-white/80 text-base group-hover:text-white/100 transition-colors duration-300">
                   Detailed nutrition information for every recipe
                 </p>
               </div>
               
-              <div className="bg-white/30 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/50 transform hover:scale-105 transition-all duration-300 hover:bg-white/40 group h-full flex flex-col items-center">
-                <div className="text-white text-3xl mb-5 bg-pink-500/60 p-5 rounded-full w-20 h-20 flex items-center justify-center shadow-md group-hover:bg-pink-500/80 transition-all duration-300">
+              <div className="bg-white/30 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/50 transform hover:scale-105 transition-all duration-300 hover:bg-white/40 group">
+                <div className="text-white text-3xl mb-5 bg-pink-500/60 p-5 rounded-full w-20 h-20 flex items-center justify-center mx-auto shadow-md group-hover:bg-pink-500/80 transition-all duration-300">
                   <FaLanguage className="mx-auto" />
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-center group-hover:text-white/100 text-white/90 transition-colors duration-300">Multilingual Support</h3>
-                <p className="text-white/80 text-center group-hover:text-white/100 transition-colors duration-300">
+                <h3 className="text-xl font-semibold mb-3 group-hover:text-white/100 text-white/90 transition-colors duration-300">{t('multilingual')}</h3>
+                <p className="text-white/80 text-base group-hover:text-white/100 transition-colors duration-300">
                   Cook in your preferred language with multilingual support
                 </p>
               </div>
@@ -233,7 +251,7 @@ const HomePage = () => {
           </div>
         </div>
         
-        {/* Decorative wave divider */}
+        {/* Fancy decorative wave divider */}
         <div className="absolute bottom-0 left-0 right-0">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120" className="fill-rose-50">
             <path d="M0,64L48,69.3C96,75,192,85,288,80C384,75,480,53,576,58.7C672,64,768,96,864,96C960,96,1056,64,1152,58.7C1248,53,1344,75,1392,85.3L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
@@ -241,7 +259,7 @@ const HomePage = () => {
         </div>
       </div>
       
-      {/* Top Rated Recipes Section */}
+      {/* Top Rated Recipes Section - Enhanced with better styling */}
       <div className="container mx-auto px-4 py-20">
         <div className="flex items-center justify-center mb-14">
           <div className="bg-pink-100 p-4 rounded-full mr-4 shadow-md">
@@ -281,7 +299,7 @@ const HomePage = () => {
         )}
       </div>
       
-      {/* Latest Recipes Section */}
+      {/* Latest Recipes Section - Enhanced with better styling */}
       <div className="bg-gradient-to-b from-rose-100 to-white py-20 rounded-t-[50px] mt-12">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-center mb-14">
