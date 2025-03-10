@@ -348,7 +348,7 @@ const SearchResults = () => {
   // Create the search results text
   const getSearchResultsText = () => {
     if (searchTerm) {
-      return `${t('search_results_for')} "${searchTerm}"`;
+      return `${t('Search Result For ')} "${searchTerm}"`;
     }
     return t('all_recipes');
   };
@@ -399,7 +399,7 @@ const SearchResults = () => {
         <div className="fixed inset-0 bg-pink-500/20 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="text-center">
             <FaMagic className="text-pink-500 text-5xl mx-auto animate-spin-slow mb-4" />
-            <p className="text-pink-600 font-medium text-xl">{t('finding_perfect_recipes')}</p>
+            <p className="text-pink-600 font-medium text-xl">{t('Finding The Perfect Recipe')}</p>
           </div>
         </div>
       )}
@@ -408,9 +408,9 @@ const SearchResults = () => {
         {/* Page Title */}
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-800 font-cursive mb-2">
-            {t('recipe_search')}
+            {t('Recipe Search')}
           </h1>
-          <p className="text-gray-600">{t('find_perfect_recipe')}</p>
+          <p className="text-gray-600">{t('Find your perfect recipe')}</p>
         </div>
         
         {/* Search Bar */}
