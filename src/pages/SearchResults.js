@@ -350,7 +350,7 @@ const SearchResults = () => {
     if (searchTerm) {
       return `${t('Search Result For ')} "${searchTerm}"`;
     }
-    return t('all_recipes');
+    return t('All recipes');
   };
   
   // Group recipes into match categories
