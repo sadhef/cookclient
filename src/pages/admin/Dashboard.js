@@ -273,7 +273,7 @@ const Dashboard = () => {
             <div className="animate-float">
               <FaMagic className="text-pink-500 text-5xl mx-auto" />
             </div>
-            <p className="text-pink-600 font-medium text-xl mt-4">{t('loading_dashboard')}...</p>
+            <p className="text-pink-600 font-medium text-xl mt-4">{t('Loading...')}...</p>
           </div>
         </div>
       )}
@@ -341,7 +341,7 @@ const Dashboard = () => {
                   <h2 className="font-bold text-gray-800">{t('top_rated_recipes')}</h2>
                 </div>
                 <Link to="/admin/recipes" className="text-pink-500 text-sm font-medium hover:underline flex items-center">
-                  {t('view_all')}
+                  {t('View all')}
                   <FaChevronRight className="ml-1" size={12} />
                 </Link>
               </div>
@@ -376,7 +376,7 @@ const Dashboard = () => {
                   <h2 className="font-bold text-gray-800">{t('recent_users')}</h2>
                 </div>
                 <Link to="/admin/users" className="text-pink-500 text-sm font-medium hover:underline flex items-center">
-                  {t('view_all')}
+                  {t('View all')}
                   <FaChevronRight className="ml-1" size={12} />
                 </Link>
               </div>
@@ -412,7 +412,7 @@ const Dashboard = () => {
                 <h2 className="font-bold text-gray-800">{t('recent_reviews')}</h2>
               </div>
               <Link to="/admin/reviews" className="text-pink-500 text-sm font-medium hover:underline flex items-center">
-                {t('view_all')}
+                {t('View all')}
                 <FaChevronRight className="ml-1" size={12} />
               </Link>
             </div>

@@ -269,7 +269,7 @@ const RecipesPage = () => {
             <div className="animate-float">
               <FaCookieBite className="text-pink-500 text-5xl mx-auto" />
             </div>
-            <p className="text-pink-600 font-medium text-xl mt-4">{t('loading_recipes')}...</p>
+            <p className="text-pink-600 font-medium text-xl mt-4">{t('Loading...')}...</p>
           </div>
         </div>
       )}
