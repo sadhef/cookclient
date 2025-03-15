@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaClock, FaStar, FaHeart, FaRegHeart, FaCheckCircle, FaSearch } from 'react-icons/fa';
+import { FaClock, FaStar, FaHeart, FaRegHeart, FaCheckCircle, FaSearch, FaBan } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { addToFavorites, removeFromFavorites } from '../../services/recipeService';
@@ -15,7 +15,8 @@ const RecipeCard = ({
   recipe, 
   refreshFavorites, 
   showSimilarityScore = false,
-  searchIngredients = []
+  searchIngredients = [],
+  excludedIngredients = []
 }) => {
   const { isAuthenticated, user } = useAuth();
   const { t } = useLanguage();
@@ -133,6 +134,36 @@ const RecipeCard = ({
     );
   };
   
+  // Highlight excluded ingredients/allergens if provided
+  const getHighlightedAllergens = () => {
+    if (!excludedIngredients || excludedIngredients.length === 0 || !recipe.ingredients) {
+      return null;
+    }
+    
+    // Find any ingredients that might contain allergens despite filtering
+    // This helps users double-check for potential cross-contamination
+    const possibleAllergens = recipe.ingredients.filter(ing => {
+      const normalizedIng = ing.toLowerCase().trim();
+      return excludedIngredients.some(allergen => 
+        normalizedIng.includes(allergen.toLowerCase())
+      );
+    });
+    
+    if (possibleAllergens.length === 0) {
+      // No allergens found in this recipe
+      return (
+        <div className="mt-2 px-2 py-1 bg-green-50 rounded-md border border-green-100">
+          <p className="text-xs text-green-700 font-medium flex items-center">
+            <FaCheckCircle className="mr-1 text-green-500" size={10} />
+            {t('allergen_free')}
+          </p>
+        </div>
+      );
+    }
+    
+    return null;
+  };
+  
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
       <Link to={`/recipes/${recipe._id}`} className="block">
@@ -204,6 +235,9 @@ const RecipeCard = ({
           
           {/* Display matching ingredients if searching */}
           {getHighlightedIngredients()}
+          
+          {/* Display allergen information if applicable */}
+          {getHighlightedAllergens()}
           
           <div className="flex justify-between items-center mt-3">
             {/* Nutrition Overview */}

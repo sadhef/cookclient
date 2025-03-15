@@ -133,6 +133,78 @@ export const searchRecipesByIngredients = async (ingredients) => {
   }
 };
 
+// Enhanced search for recipes by excluded ingredients (allergens)
+export const searchRecipesByExcludedIngredients = async (allergens) => {
+  try {
+    let allergensArray = Array.isArray(allergens) 
+      ? allergens 
+      : allergens.split(',').map(i => i.trim()).filter(Boolean);
+    
+    // If empty input, handle gracefully
+    if (allergensArray.length === 0) {
+      // Return popular recipes instead
+      return await getRecipes({
+        sort: '-averageRating',
+        limit: 15
+      });
+    }
+    
+    // Send search request with excluded ingredients
+    console.log('Searching for recipes excluding:', allergensArray);
+    
+    // First get all recipes
+    const allRecipes = await getRecipes({
+      limit: 100,
+      sort: '-averageRating'
+    });
+    
+    let recipesData = Array.isArray(allRecipes.data) ? allRecipes.data : [];
+    
+    // Filter out recipes that contain any of the allergens
+    const safeRecipes = recipesData.filter(recipe => {
+      if (!recipe.ingredients || !Array.isArray(recipe.ingredients)) {
+        return false;
+      }
+      
+      // Check if any of the recipe ingredients contain allergens
+      const hasAllergen = recipe.ingredients.some(ingredient => {
+        const ingredientLower = ingredient.toLowerCase();
+        return allergensArray.some(allergen => 
+          ingredientLower.includes(allergen.toLowerCase())
+        );
+      });
+      
+      // Keep recipes that don't have allergens
+      return !hasAllergen;
+    });
+    
+    // Deduplicate recipes
+    const uniqueRecipes = deduplicateRecipes(safeRecipes);
+    
+    // Sort by rating (highest first)
+    uniqueRecipes.sort((a, b) => b.averageRating - a.averageRating);
+    
+    console.log(`Found ${uniqueRecipes.length} allergen-free recipes`);
+    
+    // Return the safe recipes
+    return {
+      success: true,
+      count: uniqueRecipes.length,
+      data: uniqueRecipes
+    };
+  } catch (error) {
+    console.error('Error searching allergen-free recipes:', error);
+    
+    // Return empty array as fallback
+    return { 
+      success: false,
+      count: 0,
+      data: [],
+      error: error.response?.data?.error || 'Error searching allergen-free recipes'
+    };
+  }
+};
+
 // Helper function to deduplicate recipes
 const deduplicateRecipes = (recipes) => {
   // Return early if there are no recipes

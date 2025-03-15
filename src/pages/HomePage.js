@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { FaMicrophone, FaHeart, FaStar, FaUtensils, FaClock, FaCookieBite, FaLeaf, FaSearch } from 'react-icons/fa';
+import { FaMicrophone, FaHeart, FaStar, FaUtensils, FaClock, FaCookieBite, FaLeaf, FaSearch, FaAllergies } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import RecipeCard from '../components/recipe/RecipeCard';
@@ -179,13 +179,23 @@ const HomePage = () => {
             </p>
             
             {/* Large Recipe Search Button */}
-            <Link
-              to="/search"
-              className="inline-flex items-center px-10 py-6 bg-gradient-to-r from-pink-400 to-rose-500 hover:from-pink-500 hover:to-rose-600 text-white text-1xl font-medium rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-            >
-              <FaSearch className="mr-4 text-1xl" />
-              <span>{t('Search Recipes')}</span>
-            </Link>
+            <div className="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4">
+              <Link
+                to="/search"
+                className="inline-flex items-center px-10 py-6 bg-gradient-to-r from-pink-400 to-rose-500 hover:from-pink-500 hover:to-rose-600 text-white text-1xl font-medium rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              >
+                <FaSearch className="mr-4 text-1xl" />
+                <span>{t('Search Recipes')}</span>
+              </Link>
+              
+              <Link
+                to="/allergen-search"
+                className="inline-flex items-center px-10 py-6 bg-gradient-to-r from-teal-400 to-emerald-500 hover:from-teal-500 hover:to-emerald-600 text-white text-1xl font-medium rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              >
+                <FaAllergies className="mr-4 text-1xl" />
+                <span>{t('Allergen-Free Search')}</span>
+              </Link>
+            </div>
           </div>
         </div>
         

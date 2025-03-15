@@ -15,6 +15,7 @@ import { ChatbotProvider } from './context/ChatbotContext';
 // Public Pages
 import HomePage from './pages/HomePage';
 import SearchResults from './pages/SearchResults';
+import AllergenSearch from './pages/AllergenSearch';
 import RecipeDetailsPage from './pages/RecipeDetails';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -55,6 +56,7 @@ function App() {
             {/* Public Routes */}
             <Route path="/" element={<HomePage />} />
             <Route path="/search" element={<SearchResults />} />
+            <Route path="/allergen-search" element={<AllergenSearch />} />
             <Route path="/recipes/:id" element={<RecipeDetailsPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
