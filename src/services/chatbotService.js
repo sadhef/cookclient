@@ -17,19 +17,24 @@ export const getChatbotResponse = async (message, history = []) => {
         isUser: msg.isUser
       }));
     
-    // Keep up to 10 latest messages for better context preservation
-    const historyToSend = formattedHistory.slice(-10);
-    
     // If message is too long, trim it to reduce timeout risk
     const trimmedMessage = message.length > 500 ? 
       message.substring(0, 500) + '...' : 
       message;
     
-    // Call API with timeout handling
-    const response = await api.post('/chatbot/message', {
+    // Call API with increased timeout (60 seconds instead of 25)
+    const responsePromise = api.post('/chatbot/message', {
       message: trimmedMessage,
-      history: historyToSend
+      history: formattedHistory.slice(-5) // Only send last 5 messages to reduce payload size
     });
+    
+    // Set longer timeout for the request
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Response timeout')), 60000) // 60 seconds timeout
+    );
+    
+    // Race both promises
+    const response = await Promise.race([responsePromise, timeoutPromise]);
     
     return response.data.data.response;
   } catch (error) {
@@ -37,12 +42,17 @@ export const getChatbotResponse = async (message, history = []) => {
     
     // Provide more detailed error messages
     if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
-      throw new Error('Request timed out. Please try a shorter message or try again later.');
+      throw new Error('Request timed out. The server is taking too long to respond. Please try a shorter message or try again later.');
     }
     
+    // If the error has a response with specific error message, use that
+    if (error.response?.data?.error) {
+      throw new Error(error.response.data.error);
+    }
+    
+    // Otherwise use a generic error message
     throw new Error(
-      error.response?.data?.error || 
-      'Failed to communicate with Cookie 🎀. Please try again later.'
+      'Failed to communicate with Cookie 🎀. Please try again in a moment.'
     );
   }
 };
@@ -57,10 +67,18 @@ export const suggestRecipes = async (ingredients) => {
     // Limit number of ingredients to reduce payload size
     const limitedIngredients = ingredients.slice(0, 10);
     
-    // Call API with timeout handling
-    const response = await api.post('/chatbot/suggest', { 
+    // Call API with increased timeout
+    const suggestionsPromise = api.post('/chatbot/suggest', { 
       ingredients: limitedIngredients 
     });
+    
+    // Set longer timeout for the request
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Suggestions timeout')), 60000) // 60 seconds timeout
+    );
+    
+    // Race both promises
+    const response = await Promise.race([suggestionsPromise, timeoutPromise]);
     
     return response.data.data.suggestions;
   } catch (error) {
@@ -71,8 +89,13 @@ export const suggestRecipes = async (ingredients) => {
       throw new Error('The suggestion request took too long. Please try with fewer ingredients or try again later.');
     }
     
+    // If the error has a response with specific error message, use that
+    if (error.response?.data?.error) {
+      throw new Error(error.response.data.error);
+    }
+    
+    // Otherwise use a generic error message
     throw new Error(
-      error.response?.data?.error || 
       'Failed to get recipe suggestions. Please try again later.'
     );
   }
@@ -99,40 +122,9 @@ export const getMockResponse = (message) => {
   if (msgLower.includes('ingredient')) {
     return "Ingredients are the foundation of any recipe. What ingredients do you have that you'd like to cook with?";
   }
-  
-  // Recipe keyword detection for common dishes
-  if (msgLower.includes('biryani') || msgLower.includes('rice')) {
-    return `Here's a simple Chicken Biryani recipe:
 
-1. Marinate 500g chicken pieces with 1 cup yogurt, 1 tsp turmeric, 1 tsp chili powder, 1 tbsp ginger-garlic paste, and salt. Rest for 1 hour.
-
-2. Cook 2 cups basmati rice with whole spices (bay leaves, cardamom, cloves) until 70% done. Drain and set aside.
-
-3. In a heavy pot, fry 2 sliced onions until golden. Add marinated chicken and cook for 5-7 minutes.
-
-4. Layer partially cooked rice over chicken. Sprinkle with fresh herbs, saffron-infused milk, and ghee.
-
-5. Cover tightly and cook on low heat for 20-25 minutes until rice is fully cooked.
-
-Serve hot with raita!`;
-  }
-  
-  if (msgLower.includes('pasta') || msgLower.includes('spaghetti')) {
-    return `Here's a quick Pasta recipe:
-
-1. Boil 250g pasta in salted water until al dente (follow package instructions).
-
-2. While pasta cooks, heat 3 tbsp olive oil in a pan and sauté 4 minced garlic cloves until fragrant.
-
-3. Add 2 cups cherry tomatoes (halved) and cook until softened.
-
-4. Drain pasta, reserving 1/4 cup of pasta water.
-
-5. Add pasta to the pan with tomatoes, along with reserved water, fresh basil, salt, and pepper.
-
-6. Toss everything together and finish with grated Parmesan cheese.
-
-Simple, delicious, and ready in about 20 minutes!`;
+  if (msgLower.includes('timeout') || msgLower.includes('error') || msgLower.includes('not working')) {
+    return "I'm currently having trouble connecting to my knowledge base. This could be due to high traffic or network issues. You can try again with a shorter message, or try again later.";
   }
   
   // Default response
