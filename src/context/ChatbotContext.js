@@ -13,6 +13,7 @@ export const ChatbotProvider = ({ children }) => {
   const [isTyping, setIsTyping] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [isOfflineMode, setIsOfflineMode] = useState(false);
+  const [consecutiveErrors, setConsecutiveErrors] = useState(0);
   
   // Initialize with welcome message
   useEffect(() => {
@@ -63,18 +64,21 @@ export const ChatbotProvider = ({ children }) => {
       if (isOfflineMode) {
         // Use offline mode response
         response = getMockResponse(text);
+        setConsecutiveErrors(0); // Reset error counter in offline mode
       } else {
         try {
-          // Get chatbot response with a timeout of 25 seconds
-          const responsePromise = getChatbotResponse(text, messages);
-          const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Response timeout')), 25000)
-          );
-          
-          response = await Promise.race([responsePromise, timeoutPromise]);
+          // Get chatbot response with an increased timeout of 60 seconds
+          response = await getChatbotResponse(text, messages);
+          setConsecutiveErrors(0); // Reset error counter on success
         } catch (error) {
           console.error('API request failed, falling back to offline mode:', error);
-          setIsOfflineMode(true);
+          setConsecutiveErrors(prev => prev + 1);
+          
+          // If we have 3 consecutive errors, switch to offline mode permanently
+          if (consecutiveErrors >= 2) {
+            setIsOfflineMode(true);
+          }
+          
           response = getMockResponse(text);
           
           // Send a fallback error first
@@ -104,6 +108,7 @@ export const ChatbotProvider = ({ children }) => {
       setMessages(prev => [...prev, botMessage]);
     } catch (error) {
       console.error('Error sending message to chatbot:', error);
+      setConsecutiveErrors(prev => prev + 1);
       
       // Add error message
       const errorMessage = {
@@ -152,18 +157,21 @@ export const ChatbotProvider = ({ children }) => {
 3. Versatile Salad: Combine your fresh ingredients with a simple dressing of oil, vinegar, salt, and pepper.
 
 Try searching for these basic recipes in the COokiFy search bar for more detailed instructions!`;
+        
+        setConsecutiveErrors(0); // Reset error counter in offline mode
       } else {
         try {
-          // Get suggestions with a timeout of 25 seconds
-          const suggestionsPromise = suggestRecipes(ingredients);
-          const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Suggestions timeout')), 25000)
-          );
-          
-          suggestions = await Promise.race([suggestionsPromise, timeoutPromise]);
+          // Get suggestions with an increased timeout of 60 seconds
+          suggestions = await suggestRecipes(ingredients);
+          setConsecutiveErrors(0); // Reset error counter on success
         } catch (error) {
           console.error('API request failed, falling back to offline mode:', error);
-          setIsOfflineMode(true);
+          setConsecutiveErrors(prev => prev + 1);
+          
+          // If we have 3 consecutive errors, switch to offline mode permanently
+          if (consecutiveErrors >= 2) {
+            setIsOfflineMode(true);
+          }
           
           suggestions = `Based on the ingredients (${ingredients.join(', ')}), here are some simple ideas:
           
@@ -202,6 +210,7 @@ Try searching for these basic recipes in the COokiFy search bar for more detaile
       setMessages(prev => [...prev, suggestionMessage]);
     } catch (error) {
       console.error('Error getting recipe suggestions:', error);
+      setConsecutiveErrors(prev => prev + 1);
       
       // Add error message
       const errorMessage = {
@@ -218,9 +227,10 @@ Try searching for these basic recipes in the COokiFy search bar for more detaile
     }
   };
   
-  // Reset offline mode
+  // Reset offline mode and error counter
   const resetOfflineMode = () => {
     setIsOfflineMode(false);
+    setConsecutiveErrors(0);
   };
   
   // Clear chat history

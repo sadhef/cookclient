@@ -10,7 +10,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json'
   },
-  timeout: 60000, // 60 seconds for chatbot requests
+  timeout: 30000, // 30 seconds default timeout (increased from the original)
   withCredentials: true // Include credentials for cross-origin requests
 });
 
@@ -24,7 +24,7 @@ api.interceptors.request.use(
     
     // Increase timeout for chatbot-related endpoints
     if (config.url && config.url.includes('/chatbot')) {
-      config.timeout = 60000; // 60 seconds for chatbot requests
+      config.timeout = 90000; // 90 seconds for chatbot requests (increased from 60s)
     }
     
     return config;
