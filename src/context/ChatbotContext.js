@@ -1,4 +1,3 @@
-// client/src/context/ChatbotContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useLanguage } from './LanguageContext';
 import { getChatbotResponse, suggestRecipes, getMockResponse } from '../services/chatbotService';
@@ -14,6 +13,7 @@ export const ChatbotProvider = ({ children }) => {
   const [isTyping, setIsTyping] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [isOfflineMode, setIsOfflineMode] = useState(false);
+  const [consecutiveErrors, setConsecutiveErrors] = useState(0);
   
   // Initialize with welcome message
   useEffect(() => {
@@ -64,77 +64,21 @@ export const ChatbotProvider = ({ children }) => {
       if (isOfflineMode) {
         // Use offline mode response
         response = getMockResponse(text);
+        setConsecutiveErrors(0); // Reset error counter in offline mode
       } else {
         try {
-          // Get chatbot response with a timeout handling
-          const responsePromise = getChatbotResponse(text, messages);
-          const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Response timeout')), 40000) // Increased timeout to 40 seconds
-          );
-          
-          response = await Promise.race([responsePromise, timeoutPromise]);
-          
-          // FIX: Handle response chunking if it's too long
-          if (response && response.length > 2000) {
-            // Break the response into smaller chunks of max 1500 characters
-            // Try to break at paragraph or sentence boundaries
-            const chunks = [];
-            let currentChunk = '';
-            
-            // Split by paragraphs first
-            const paragraphs = response.split('\n\n');
-            
-            for (const paragraph of paragraphs) {
-              if (currentChunk.length + paragraph.length + 2 <= 1500) {
-                currentChunk += (currentChunk ? '\n\n' : '') + paragraph;
-              } else {
-                // Check if current chunk needs to be broken down further
-                if (currentChunk) {
-                  chunks.push(currentChunk);
-                  currentChunk = paragraph;
-                } else {
-                  // If a single paragraph is too long, break it by sentences
-                  const sentences = paragraph.split(/(?<=[.!?])\s+/);
-                  for (const sentence of sentences) {
-                    if (currentChunk.length + sentence.length + 1 <= 1500) {
-                      currentChunk += (currentChunk ? ' ' : '') + sentence;
-                    } else {
-                      chunks.push(currentChunk);
-                      currentChunk = sentence;
-                    }
-                  }
-                }
-              }
-            }
-            
-            // Add the last chunk if it exists
-            if (currentChunk) {
-              chunks.push(currentChunk);
-            }
-            
-            // Send the chunks as separate messages
-            for (let i = 0; i < chunks.length; i++) {
-              const botMessage = {
-                id: `bot-${Date.now()}-${i}`,
-                text: chunks[i],
-                isUser: false,
-                timestamp: new Date()
-              };
-              
-              setMessages(prev => [...prev, botMessage]);
-              
-              // If there are more chunks, add a small delay between messages
-              if (i < chunks.length - 1) {
-                await new Promise(resolve => setTimeout(resolve, 1000));
-              }
-            }
-            
-            setIsTyping(false);
-            return;
-          }
+          // Get chatbot response with an increased timeout of 60 seconds
+          response = await getChatbotResponse(text, messages);
+          setConsecutiveErrors(0); // Reset error counter on success
         } catch (error) {
           console.error('API request failed, falling back to offline mode:', error);
-          setIsOfflineMode(true);
+          setConsecutiveErrors(prev => prev + 1);
+          
+          // If we have 3 consecutive errors, switch to offline mode permanently
+          if (consecutiveErrors >= 2) {
+            setIsOfflineMode(true);
+          }
+          
           response = getMockResponse(text);
           
           // Send a fallback error first
@@ -164,6 +108,7 @@ export const ChatbotProvider = ({ children }) => {
       setMessages(prev => [...prev, botMessage]);
     } catch (error) {
       console.error('Error sending message to chatbot:', error);
+      setConsecutiveErrors(prev => prev + 1);
       
       // Add error message
       const errorMessage = {
@@ -212,42 +157,21 @@ export const ChatbotProvider = ({ children }) => {
 3. Versatile Salad: Combine your fresh ingredients with a simple dressing of oil, vinegar, salt, and pepper.
 
 Try searching for these basic recipes in the COokiFy search bar for more detailed instructions!`;
+        
+        setConsecutiveErrors(0); // Reset error counter in offline mode
       } else {
         try {
-          // Get suggestions with an increased timeout of 40 seconds
-          const suggestionsPromise = suggestRecipes(ingredients);
-          const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Suggestions timeout')), 40000)
-          );
-          
-          suggestions = await Promise.race([suggestionsPromise, timeoutPromise]);
-          
-          // Similar chunking logic for long recipe suggestions
-          if (suggestions && suggestions.length > 2000) {
-            const chunks = suggestions.split(/(?<=\d\.\s.*?\n\n)/g).filter(chunk => chunk.trim());
-            
-            for (let i = 0; i < chunks.length; i++) {
-              const suggestionMessage = {
-                id: `bot-${Date.now()}-${i}`,
-                text: chunks[i],
-                isUser: false,
-                timestamp: new Date()
-              };
-              
-              setMessages(prev => [...prev, suggestionMessage]);
-              
-              // If there are more chunks, add a small delay between messages
-              if (i < chunks.length - 1) {
-                await new Promise(resolve => setTimeout(resolve, 1000));
-              }
-            }
-            
-            setIsTyping(false);
-            return;
-          }
+          // Get suggestions with an increased timeout of 60 seconds
+          suggestions = await suggestRecipes(ingredients);
+          setConsecutiveErrors(0); // Reset error counter on success
         } catch (error) {
           console.error('API request failed, falling back to offline mode:', error);
-          setIsOfflineMode(true);
+          setConsecutiveErrors(prev => prev + 1);
+          
+          // If we have 3 consecutive errors, switch to offline mode permanently
+          if (consecutiveErrors >= 2) {
+            setIsOfflineMode(true);
+          }
           
           suggestions = `Based on the ingredients (${ingredients.join(', ')}), here are some simple ideas:
           
@@ -286,6 +210,7 @@ Try searching for these basic recipes in the COokiFy search bar for more detaile
       setMessages(prev => [...prev, suggestionMessage]);
     } catch (error) {
       console.error('Error getting recipe suggestions:', error);
+      setConsecutiveErrors(prev => prev + 1);
       
       // Add error message
       const errorMessage = {
@@ -302,9 +227,10 @@ Try searching for these basic recipes in the COokiFy search bar for more detaile
     }
   };
   
-  // Reset offline mode
+  // Reset offline mode and error counter
   const resetOfflineMode = () => {
     setIsOfflineMode(false);
+    setConsecutiveErrors(0);
   };
   
   // Clear chat history
