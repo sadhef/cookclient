@@ -1,161 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaUser, FaUtensils, FaStar, FaUsers, FaChartPie, FaEye, FaChevronRight, FaHeart, FaCrown, FaCommentAlt, FaMagic } from 'react-icons/fa';
+import { 
+  FaUser, 
+  FaUtensils, 
+  FaStar, 
+  FaUsers, 
+  FaChartPie, 
+  FaEye, 
+  FaChevronRight, 
+  FaHeart, 
+  FaCrown, 
+  FaCommentAlt, 
+  FaMagic 
+} from 'react-icons/fa';
 import { useLanguage } from '../../context/LanguageContext';
 import { getDashboardStats } from '../../services/adminService';
 import { getRecipeReviews } from '../../services/reviewService';
 import { getRecipes } from '../../services/recipeService';
 import AdminSidebar from './AdminSidebar';
 import { toast } from 'react-toastify';
-
-const StatCard = ({ title, value, icon, gradient, trend }) => {
-  return (
-    <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-pink-100 transform hover:scale-102 transition-all duration-300">
-      <div className="p-6">
-        <div className="flex items-center">
-          <div className={`flex-shrink-0 rounded-2xl p-4 mr-4 ${gradient}`}>
-            {icon}
-          </div>
-          <div>
-            <h3 className="text-sm font-medium text-gray-500 uppercase">{title}</h3>
-            <p className="text-3xl font-bold text-gray-800 mt-1">{value}</p>
-          </div>
-        </div>
-      </div>
-      <div className="px-6 py-3 bg-pink-50 border-t border-pink-100">
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-gray-600">{trend || "All time"}</span>
-          <span className="text-pink-500 font-medium">View all</span>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const RecipeCard = ({ recipe }) => {
-  return (
-    <div className="flex items-center p-4 hover:bg-pink-50 transition-all duration-300 rounded-xl">
-      <div className="flex-shrink-0 w-14 h-14 mr-4 overflow-hidden rounded-xl shadow-sm border border-pink-100">
-        <img 
-          src={recipe.image || '/default-recipe.jpg'} 
-          alt={recipe.title}
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = '/default-recipe.jpg';
-          }}
-        />
-      </div>
-      <div className="flex-grow min-w-0">
-        <h4 className="font-medium text-gray-900 truncate">{recipe.title || 'Untitled Recipe'}</h4>
-        <div className="flex items-center text-gray-500 text-sm">
-          <FaStar className="text-yellow-400 mr-1" />
-          <span>{(recipe.averageRating || 0).toFixed(1)} ({recipe.ratingCount || 0})</span>
-        </div>
-      </div>
-      <Link 
-        to={`/recipes/${recipe._id}`} 
-        className="ml-2 text-pink-500 p-2 hover:bg-pink-100 rounded-full transition-colors transform hover:scale-110"
-        title="View Recipe"
-      >
-        <FaEye />
-      </Link>
-    </div>
-  );
-};
-
-const ReviewCard = ({ review }) => {
-  if (!review || !review.user) return null;
-  
-  return (
-    <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-pink-100 transform hover:scale-102 transition-all duration-300">
-      <div className="p-4">
-        <div className="flex items-center mb-3">
-          <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center flex-shrink-0 border-2 border-pink-200">
-            {review.user.avatar ? (
-              <img 
-                src={review.user.avatar} 
-                alt={review.user.name}
-                className="w-full h-full rounded-full object-cover"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = '/default-avatar.jpg';
-                }}
-              />
-            ) : (
-              <FaUser className="text-pink-400" />
-            )}
-          </div>
-          <div className="ml-3">
-            <p className="font-medium text-gray-800">{review.user.name || 'Unknown User'}</p>
-            <div className="flex items-center">
-              {[...Array(5)].map((_, i) => (
-                <FaStar key={i} className={`${i < (review.rating || 0) ? 'text-yellow-400' : 'text-gray-200'} text-xs`} />
-              ))}
-              <span className="ml-1 text-xs text-gray-500">
-                {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : 'Unknown'}
-              </span>
-            </div>
-          </div>
-        </div>
-        <div className="bg-pink-50 p-3 rounded-xl relative">
-          <div className="absolute -top-2 -left-2 transform rotate-12 text-pink-300">
-            <FaCommentAlt size={14} />
-          </div>
-          <p className="text-gray-700 text-sm line-clamp-2">{review.comment || 'No comment'}</p>
-        </div>
-      </div>
-      
-      {review.recipe && review.recipe._id && review.recipe.title && (
-        <div className="px-4 py-2 bg-pink-50 border-t border-pink-100">
-          <Link 
-            to={`/recipes/${review.recipe._id}`} 
-            className="text-xs text-pink-500 hover:text-pink-600 inline-flex items-center"
-          >
-            <FaUtensils className="mr-1" />
-            <span className="truncate">{review.recipe.title}</span>
-            <FaChevronRight className="ml-auto text-pink-300" size={12} />
-          </Link>
-        </div>
-      )}
-    </div>
-  );
-};
-
-const UserCard = ({ user }) => {
-  return (
-    <div className="flex items-center p-4 hover:bg-pink-50 transition-all duration-300 rounded-xl">
-      <div className="flex-shrink-0 w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center overflow-hidden border-2 border-pink-200">
-        {user.avatar ? (
-          <img 
-            src={user.avatar} 
-            alt={user.name}
-            className="w-full h-full rounded-full object-cover"
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = '/default-avatar.jpg';
-            }}
-          />
-        ) : (
-          <FaUser className="text-pink-400" />
-        )}
-      </div>
-      <div className="ml-3 flex-grow min-w-0">
-        <h4 className="font-medium text-gray-800 truncate">{user.name || 'Unknown User'}</h4>
-        <p className="text-sm text-gray-500 truncate">{user.email || 'No email'}</p>
-      </div>
-      <div className="flex-shrink-0">
-        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-          user.role === 'admin' 
-            ? 'bg-purple-100 text-purple-800' 
-            : 'bg-pink-100 text-pink-800'
-        }`}>
-          {user.role || 'user'}
-        </span>
-      </div>
-    </div>
-  );
-};
 
 const Dashboard = () => {
   const { t } = useLanguage();
@@ -273,7 +136,7 @@ const Dashboard = () => {
             <div className="animate-float">
               <FaMagic className="text-pink-500 text-5xl mx-auto" />
             </div>
-            <p className="text-pink-600 font-medium text-xl mt-4">{t('Loading...')}...</p>
+            <p className="text-pink-600 font-medium text-xl mt-4">{t('loading_dashboard')}...</p>
           </div>
         </div>
       )}
@@ -306,27 +169,71 @@ const Dashboard = () => {
         <div className="px-6">
           {/* Stats cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <StatCard 
-              title={t('total_users')}
-              value={stats?.counts?.users || 0}
-              icon={<FaUsers className="text-white" size={24} />}
-              gradient="bg-gradient-to-r from-blue-400 to-blue-600"
-              trend="All registered users"
-            />
-            <StatCard 
-              title={t('total_recipes')}
-              value={stats?.counts?.recipes || 0}
-              icon={<FaUtensils className="text-white" size={24} />}
-              gradient="bg-gradient-to-r from-pink-400 to-rose-500"
-              trend="Published recipes"
-            />
-            <StatCard 
-              title={t('total_reviews')}
-              value={stats?.counts?.reviews || 0}
-              icon={<FaStar className="text-white" size={24} />}
-              gradient="bg-gradient-to-r from-yellow-400 to-amber-500"
-              trend="User feedback"
-            />
+            <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-pink-100 transform hover:scale-102 transition-all duration-300">
+              <div className="p-6">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0 rounded-2xl p-4 mr-4 bg-gradient-to-r from-blue-400 to-blue-600">
+                    <FaUsers className="text-white" size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 uppercase">{t('total_users')}</h3>
+                    <p className="text-3xl font-bold text-gray-800 mt-1">{stats?.counts?.users || 0}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="px-6 py-3 bg-pink-50 border-t border-pink-100">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">All registered users</span>
+                  <Link to="/admin/users" className="text-pink-500 font-medium">
+                    {t('view_all')}
+                  </Link>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-pink-100 transform hover:scale-102 transition-all duration-300">
+              <div className="p-6">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0 rounded-2xl p-4 mr-4 bg-gradient-to-r from-pink-400 to-rose-500">
+                    <FaUtensils className="text-white" size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 uppercase">{t('total_recipes')}</h3>
+                    <p className="text-3xl font-bold text-gray-800 mt-1">{stats?.counts?.recipes || 0}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="px-6 py-3 bg-pink-50 border-t border-pink-100">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">Published recipes</span>
+                  <Link to="/admin/recipes" className="text-pink-500 font-medium">
+                    {t('view_all')}
+                  </Link>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-pink-100 transform hover:scale-102 transition-all duration-300">
+              <div className="p-6">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0 rounded-2xl p-4 mr-4 bg-gradient-to-r from-yellow-400 to-amber-500">
+                    <FaStar className="text-white" size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 uppercase">{t('total_reviews')}</h3>
+                    <p className="text-3xl font-bold text-gray-800 mt-1">{stats?.counts?.reviews || 0}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="px-6 py-3 bg-pink-50 border-t border-pink-100">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">User feedback</span>
+                  <Link to="/admin/reviews" className="text-pink-500 font-medium">
+                    {t('view_all')}
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
           
           {/* Two-column layout */}
@@ -341,7 +248,7 @@ const Dashboard = () => {
                   <h2 className="font-bold text-gray-800">{t('top_rated_recipes')}</h2>
                 </div>
                 <Link to="/admin/recipes" className="text-pink-500 text-sm font-medium hover:underline flex items-center">
-                  {t('View all')}
+                  {t('view_all')}
                   <FaChevronRight className="ml-1" size={12} />
                 </Link>
               </div>
@@ -350,7 +257,33 @@ const Dashboard = () => {
                 {stats && stats.topRatedRecipes && stats.topRatedRecipes.length > 0 ? (
                   stats.topRatedRecipes.map(recipe => (
                     <div className="px-6 py-3" key={recipe._id}>
-                      <RecipeCard recipe={recipe} />
+                      <div className="flex items-center p-4 hover:bg-pink-50 transition-all duration-300 rounded-xl">
+                        <div className="flex-shrink-0 w-14 h-14 mr-4 overflow-hidden rounded-xl shadow-sm border border-pink-100">
+                          <img 
+                            src={recipe.image || '/default-recipe.jpg'} 
+                            alt={recipe.title}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = '/default-recipe.jpg';
+                            }}
+                          />
+                        </div>
+                        <div className="flex-grow min-w-0">
+                          <h4 className="font-medium text-gray-900 truncate">{recipe.title || 'Untitled Recipe'}</h4>
+                          <div className="flex items-center text-gray-500 text-sm">
+                            <FaStar className="text-yellow-400 mr-1" />
+                            <span>{(recipe.averageRating || 0).toFixed(1)} ({recipe.ratingCount || 0})</span>
+                          </div>
+                        </div>
+                        <Link 
+                          to={`/recipes/${recipe._id}`} 
+                          className="ml-2 text-pink-500 p-2 hover:bg-pink-100 rounded-full transition-colors transform hover:scale-110"
+                          title="View Recipe"
+                        >
+                          <FaEye />
+                        </Link>
+                      </div>
                     </div>
                   ))
                 ) : (
@@ -376,7 +309,7 @@ const Dashboard = () => {
                   <h2 className="font-bold text-gray-800">{t('recent_users')}</h2>
                 </div>
                 <Link to="/admin/users" className="text-pink-500 text-sm font-medium hover:underline flex items-center">
-                  {t('View all')}
+                  {t('view_all')}
                   <FaChevronRight className="ml-1" size={12} />
                 </Link>
               </div>
@@ -385,7 +318,36 @@ const Dashboard = () => {
                 {stats && stats.recentUsers && stats.recentUsers.length > 0 ? (
                   stats.recentUsers.map(user => (
                     <div className="px-6 py-3" key={user._id}>
-                      <UserCard user={user} />
+                      <div className="flex items-center p-4 hover:bg-pink-50 transition-all duration-300 rounded-xl">
+                        <div className="flex-shrink-0 w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center overflow-hidden border-2 border-pink-200">
+                          {user.avatar ? (
+                            <img 
+                              src={user.avatar} 
+                              alt={user.name}
+                              className="w-full h-full rounded-full object-cover"
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = '/default-avatar.jpg';
+                              }}
+                            />
+                          ) : (
+                            <FaUser className="text-pink-400" />
+                          )}
+                        </div>
+                        <div className="ml-3 flex-grow min-w-0">
+                          <h4 className="font-medium text-gray-800 truncate">{user.name || 'Unknown User'}</h4>
+                          <p className="text-sm text-gray-500 truncate">{user.email || 'No email'}</p>
+                        </div>
+                        <div className="flex-shrink-0">
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                            user.role === 'admin' 
+                              ? 'bg-purple-100 text-purple-800' 
+                              : 'bg-pink-100 text-pink-800'
+                          }`}>
+                            {user.role || 'user'}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   ))
                 ) : (
@@ -412,7 +374,7 @@ const Dashboard = () => {
                 <h2 className="font-bold text-gray-800">{t('recent_reviews')}</h2>
               </div>
               <Link to="/admin/reviews" className="text-pink-500 text-sm font-medium hover:underline flex items-center">
-                {t('View all')}
+                {t('view_all')}
                 <FaChevronRight className="ml-1" size={12} />
               </Link>
             </div>
@@ -424,7 +386,61 @@ const Dashboard = () => {
             ) : recentReviews && recentReviews.length > 0 ? (
               <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {recentReviews.map((review, index) => (
-                  <ReviewCard key={review._id || `review-${index}`} review={review} />
+                  <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-pink-100 transform hover:scale-102 transition-all duration-300" key={review._id || `review-${index}`}>
+                    {review && review.user && (
+                      <>
+                        <div className="p-4">
+                          <div className="flex items-center mb-3">
+                            <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center flex-shrink-0 border-2 border-pink-200">
+                              {review.user.avatar ? (
+                                <img 
+                                  src={review.user.avatar} 
+                                  alt={review.user.name}
+                                  className="w-full h-full rounded-full object-cover"
+                                  onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = '/default-avatar.jpg';
+                                  }}
+                                />
+                              ) : (
+                                <FaUser className="text-pink-400" />
+                              )}
+                            </div>
+                            <div className="ml-3">
+                              <p className="font-medium text-gray-800">{review.user.name || 'Unknown User'}</p>
+                              <div className="flex items-center">
+                                {[...Array(5)].map((_, i) => (
+                                  <FaStar key={i} className={`${i < (review.rating || 0) ? 'text-yellow-400' : 'text-gray-200'} text-xs`} />
+                                ))}
+                                <span className="ml-1 text-xs text-gray-500">
+                                  {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : 'Unknown'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="bg-pink-50 p-3 rounded-xl relative">
+                            <div className="absolute -top-2 -left-2 transform rotate-12 text-pink-300">
+                              <FaCommentAlt size={14} />
+                            </div>
+                            <p className="text-gray-700 text-sm line-clamp-2">{review.comment || 'No comment'}</p>
+                          </div>
+                        </div>
+                        
+                        {review.recipe && review.recipe._id && review.recipe.title && (
+                          <div className="px-4 py-2 bg-pink-50 border-t border-pink-100">
+                            <Link 
+                              to={`/recipes/${review.recipe._id}`} 
+                              className="text-xs text-pink-500 hover:text-pink-600 inline-flex items-center"
+                            >
+                              <FaUtensils className="mr-1" />
+                              <span className="truncate">{review.recipe.title}</span>
+                              <FaChevronRight className="ml-auto text-pink-300" size={12} />
+                            </Link>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
                 ))}
               </div>
             ) : (
