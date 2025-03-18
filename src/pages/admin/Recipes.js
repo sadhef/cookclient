@@ -41,7 +41,7 @@ const RecipesPage = () => {
   const [moderationNote, setModerationNote] = useState('');
   const [showAnimation, setShowAnimation] = useState(false);
   
-  // Fetch recipes
+  // Fetch recipes - updated to sort by highest rating
   const fetchRecipes = useCallback(async () => {
     try {
       setLoading(true);
@@ -51,7 +51,8 @@ const RecipesPage = () => {
       const params = {
         page: currentPage,
         limit: 10,
-        sort: '-createdAt'
+        // Changed from '-createdAt' to '-averageRating' to sort by highest rating first
+        sort: '-averageRating'
       };
       
       // Add filters
@@ -269,7 +270,7 @@ const RecipesPage = () => {
             <div className="animate-float">
               <FaCookieBite className="text-pink-500 text-5xl mx-auto" />
             </div>
-            <p className="text-pink-600 font-medium text-xl mt-4">{t('Loading...')}...</p>
+            <p className="text-pink-600 font-medium text-xl mt-4">{t('loading_recipes')}...</p>
           </div>
         </div>
       )}
@@ -297,7 +298,7 @@ const RecipesPage = () => {
                   <input
                     type="text"
                     className="block w-full pl-12 pr-4 py-3 bg-pink-50 border border-pink-100 rounded-xl shadow-inner placeholder-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent"
-                    placeholder={t('Search Recipes')}
+                    placeholder={t('search_recipes')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
