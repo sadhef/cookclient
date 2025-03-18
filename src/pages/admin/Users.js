@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { FaPlus, FaEdit, FaTrash, FaSearch, FaCheck, FaTimes } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaSearch, FaCheck, FaTimes, FaUser } from 'react-icons/fa';
 import { useLanguage } from '../../context/LanguageContext';
-import { getUsers, createUser, updateUser, deleteUser } from '../../services/adminService';
+import { getUsers, updateUser, deleteUser } from '../../services/adminService';
 import AdminSidebar from './AdminSidebar';
 import { toast } from 'react-toastify';
 import { useFormik } from 'formik';
@@ -15,6 +15,7 @@ const UsersPage = () => {
   const [editingUser, setEditingUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const [showAnimation, setShowAnimation] = useState(false);
   
   const formik = useFormik({
     initialValues: {
@@ -55,10 +56,6 @@ const UsersPage = () => {
           const updatedUser = await updateUser(editingUser._id, updateData);
           setUsers(users.map(user => user._id === updatedUser._id ? updatedUser : user));
           toast.success(t('user_updated'));
-        } else {
-          const newUser = await createUser(values);
-          setUsers([newUser, ...users]);
-          toast.success(t('user_created'));
         }
         
         closeModal();
@@ -75,12 +72,14 @@ const UsersPage = () => {
     const fetchUsers = async () => {
       try {
         setLoading(true);
+        setShowAnimation(true);
         const usersData = await getUsers();
         setUsers(usersData);
       } catch (error) {
         toast.error(error || t('error_occurred'));
       } finally {
         setLoading(false);
+        setTimeout(() => setShowAnimation(false), 1000);
       }
     };
     
@@ -103,19 +102,6 @@ const UsersPage = () => {
       password: '', // Don't show password
       role: user.role,
       _action: 'edit'
-    });
-    setModalOpen(true);
-  };
-  
-  // Open modal for creating
-  const handleCreate = () => {
-    setEditingUser(null);
-    formik.setValues({
-      name: '',
-      email: '',
-      password: '',
-      role: 'user',
-      _action: 'create'
     });
     setModalOpen(true);
   };
@@ -152,162 +138,185 @@ const UsersPage = () => {
   );
   
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-rose-50">
       <AdminSidebar />
       
-      <div className="flex-1 p-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">{t('manage_users')}</h1>
-          
-          <button
-            onClick={handleCreate}
-            className="bg-primary text-white px-4 py-2 rounded-md flex items-center space-x-2 hover:bg-primary-dark"
-          >
-            <FaPlus />
-            <span>{t('create_user')}</span>
-          </button>
-        </div>
-        
-        {/* Search */}
-        <div className="mb-6">
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FaSearch className="text-gray-400" />
+      {/* Loading animation overlay */}
+      {showAnimation && (
+        <div className="fixed inset-0 bg-pink-500/20 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="text-center">
+            <div className="animate-float">
+              <FaUser className="text-pink-500 text-5xl mx-auto" />
             </div>
-            <input
-              type="text"
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary sm:text-sm"
-              placeholder={t('Search Users')}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+            <p className="text-pink-600 font-medium text-xl mt-4">{t('loading_users')}...</p>
+          </div>
+        </div>
+      )}
+      
+      <div className="pb-6">
+        {/* Page header */}
+        <div className="bg-white shadow-md p-6 mb-8 border-b border-pink-100">
+          <div className="flex items-center">
+            <div className="bg-pink-100 p-3 rounded-full mr-3">
+              <FaUser className="text-pink-500" size={20} />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-800">{t('manage_users')}</h1>
           </div>
         </div>
         
-        {/* Users Table */}
-        <div className="bg-white shadow-md rounded-lg overflow-hidden">
-          {loading && !users.length ? (
-            <div className="flex justify-center items-center p-8">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-primary"></div>
+        <div className="px-6">
+          {/* Search */}
+          <div className="mb-6">
+            <div className="bg-white rounded-3xl shadow-lg p-4 border border-pink-100">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <FaSearch className="text-pink-400" />
+                </div>
+                <input
+                  type="text"
+                  className="block w-full pl-12 pr-4 py-3 border border-pink-200 rounded-full leading-5 bg-white placeholder-pink-300 focus:outline-none focus:placeholder-pink-300 focus:border-pink-400 focus:ring-1 focus:ring-pink-400 transition-all duration-300"
+                  placeholder={t('search_users')}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
             </div>
-          ) : (
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('name')}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('email')}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('role')}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('created_at')}
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('actions')}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredUsers.length === 0 ? (
-                  <tr>
-                    <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
-                      {searchTerm ? t('no_matching_users') : t('no_users')}
-                    </td>
-                  </tr>
-                ) : (
-                  filteredUsers.map(user => (
-                    <tr key={user._id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                            {user.avatar ? (
-                              <img 
-                                src={user.avatar} 
-                                alt={user.name}
-                                className="h-10 w-10 rounded-full"
-                              />
-                            ) : (
-                              <span className="text-gray-500 font-semibold">
-                                {user.name.charAt(0).toUpperCase()}
-                              </span>
-                            )}
-                          </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {user.name}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {user.email}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          user.role === 'admin' 
-                            ? 'bg-purple-100 text-purple-800' 
-                            : 'bg-blue-100 text-blue-800'
-                        }`}>
-                          {user.role}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(user.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        {confirmDelete && confirmDelete._id === user._id ? (
-                          <div className="flex justify-end space-x-2">
-                            <button
-                              onClick={handleDeleteConfirmed}
-                              className="text-red-600 hover:text-red-800"
-                              disabled={loading}
-                            >
-                              <FaCheck />
-                            </button>
-                            <button
-                              onClick={handleDeleteCancel}
-                              className="text-gray-600 hover:text-gray-800"
-                            >
-                              <FaTimes />
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex justify-end space-x-2">
-                            <button
-                              onClick={() => handleEdit(user)}
-                              className="text-indigo-600 hover:text-indigo-800"
-                            >
-                              <FaEdit />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteConfirm(user)}
-                              className="text-red-600 hover:text-red-800"
-                            >
-                              <FaTrash />
-                            </button>
-                          </div>
-                        )}
-                      </td>
+          </div>
+          
+          {/* Users Table */}
+          <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-pink-100">
+            {loading && !users.length ? (
+              <div className="flex justify-center items-center p-8">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-pink-500"></div>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-pink-100">
+                  <thead className="bg-pink-50">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-pink-500 uppercase tracking-wider">
+                        {t('name')}
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-pink-500 uppercase tracking-wider">
+                        {t('email')}
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-pink-500 uppercase tracking-wider">
+                        {t('role')}
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-pink-500 uppercase tracking-wider">
+                        {t('created_at')}
+                      </th>
+                      <th className="px-6 py-4 text-right text-xs font-medium text-pink-500 uppercase tracking-wider">
+                        {t('actions')}
+                      </th>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          )}
+                  </thead>
+                  <tbody className="bg-white divide-y divide-pink-100">
+                    {filteredUsers.length === 0 ? (
+                      <tr>
+                        <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
+                          {searchTerm ? t('no_matching_users') : t('no_users')}
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredUsers.map(user => (
+                        <tr key={user._id} className="hover:bg-pink-50 transition-colors duration-200">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="flex-shrink-0 h-10 w-10 rounded-full bg-pink-100 flex items-center justify-center border-2 border-pink-200">
+                                {user.avatar ? (
+                                  <img 
+                                    src={user.avatar} 
+                                    alt={user.name}
+                                    className="h-10 w-10 rounded-full object-cover"
+                                    onError={(e) => {
+                                      e.target.onerror = null;
+                                      e.target.src = '/default-avatar.jpg';
+                                    }}
+                                  />
+                                ) : (
+                                  <span className="text-pink-500 font-semibold">
+                                    {user.name.charAt(0).toUpperCase()}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="ml-4">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {user.name}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {user.email}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              user.role === 'admin' 
+                                ? 'bg-purple-100 text-purple-800' 
+                                : 'bg-pink-100 text-pink-800'
+                            }`}>
+                              {user.role}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {new Date(user.createdAt).toLocaleDateString()}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            {confirmDelete && confirmDelete._id === user._id ? (
+                              <div className="flex justify-end space-x-2">
+                                <button
+                                  onClick={handleDeleteConfirmed}
+                                  className="text-white bg-red-500 hover:bg-red-600 p-2 rounded-full shadow-sm transition-colors"
+                                  disabled={loading}
+                                >
+                                  <FaCheck size={14} />
+                                </button>
+                                <button
+                                  onClick={handleDeleteCancel}
+                                  className="text-white bg-gray-400 hover:bg-gray-500 p-2 rounded-full shadow-sm transition-colors"
+                                >
+                                  <FaTimes size={14} />
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex justify-end space-x-2">
+                                <button
+                                  onClick={() => handleEdit(user)}
+                                  className="text-green-500 hover:text-green-600 bg-green-50 hover:bg-green-100 p-2 rounded-full transition-colors"
+                                  title={t('edit')}
+                                >
+                                  <FaEdit size={14} />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteConfirm(user)}
+                                  className="text-red-500 hover:text-red-600 bg-red-50 hover:bg-red-100 p-2 rounded-full transition-colors"
+                                  title={t('delete')}
+                                >
+                                  <FaTrash size={14} />
+                                </button>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
       </div>
       
-      {/* Modal */}
+      {/* Edit User Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800">
-                {editingUser ? t('edit_user') : t('create_user')}
+        <div className="fixed inset-0 bg-pink-500/20 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-3xl shadow-xl max-w-md w-full border border-pink-100">
+            <div className="px-6 py-4 border-b border-pink-100">
+              <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                <FaEdit className="text-pink-500 mr-2" />
+                {t('edit_user')}
               </h3>
             </div>
             
@@ -323,11 +332,11 @@ const UsersPage = () => {
                     value={formik.values.name}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    className={`w-full px-3 py-2 border ${
+                    className={`w-full px-4 py-3 border ${
                       formik.touched.name && formik.errors.name
-                        ? 'border-red-500'
-                        : 'border-gray-300'
-                    } rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary`}
+                        ? 'border-red-300 focus:ring-red-300'
+                        : 'border-pink-200 focus:ring-pink-300'
+                    } rounded-xl focus:outline-none focus:ring-2 focus:border-transparent`}
                   />
                   {formik.touched.name && formik.errors.name && (
                     <p className="mt-1 text-sm text-red-500">{formik.errors.name}</p>
@@ -344,11 +353,11 @@ const UsersPage = () => {
                     value={formik.values.email}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    className={`w-full px-3 py-2 border ${
+                    className={`w-full px-4 py-3 border ${
                       formik.touched.email && formik.errors.email
-                        ? 'border-red-500'
-                        : 'border-gray-300'
-                    } rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary`}
+                        ? 'border-red-300 focus:ring-red-300'
+                        : 'border-pink-200 focus:ring-pink-300'
+                    } rounded-xl focus:outline-none focus:ring-2 focus:border-transparent`}
                   />
                   {formik.touched.email && formik.errors.email && (
                     <p className="mt-1 text-sm text-red-500">{formik.errors.email}</p>
@@ -358,11 +367,9 @@ const UsersPage = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     {t('password')}
-                    {editingUser && (
-                      <span className="text-xs text-gray-500 ml-1">
-                        ({t('leave_empty_to_keep_current')})
-                      </span>
-                    )}
+                    <span className="text-xs text-gray-500 ml-1">
+                      ({t('leave_empty_to_keep_current')})
+                    </span>
                   </label>
                   <input
                     type="password"
@@ -370,11 +377,11 @@ const UsersPage = () => {
                     value={formik.values.password}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    className={`w-full px-3 py-2 border ${
+                    className={`w-full px-4 py-3 border ${
                       formik.touched.password && formik.errors.password
-                        ? 'border-red-500'
-                        : 'border-gray-300'
-                    } rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary`}
+                        ? 'border-red-300 focus:ring-red-300'
+                        : 'border-pink-200 focus:ring-pink-300'
+                    } rounded-xl focus:outline-none focus:ring-2 focus:border-transparent`}
                   />
                   {formik.touched.password && formik.errors.password && (
                     <p className="mt-1 text-sm text-red-500">{formik.errors.password}</p>
@@ -390,11 +397,11 @@ const UsersPage = () => {
                     value={formik.values.role}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    className={`w-full px-3 py-2 border ${
+                    className={`w-full px-4 py-3 border ${
                       formik.touched.role && formik.errors.role
-                        ? 'border-red-500'
-                        : 'border-gray-300'
-                    } rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary`}
+                        ? 'border-red-300 focus:ring-red-300'
+                        : 'border-pink-200 focus:ring-pink-300'
+                    } rounded-xl focus:outline-none focus:ring-2 focus:border-transparent`}
                   >
                     <option value="user">{t('user')}</option>
                     <option value="admin">{t('admin')}</option>
@@ -405,20 +412,20 @@ const UsersPage = () => {
                 </div>
               </div>
               
-              <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+              <div className="px-6 py-4 border-t border-pink-100 flex justify-end space-x-3">
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                  className="px-4 py-2 border border-pink-200 rounded-xl text-pink-500 hover:bg-pink-50 transition-colors shadow-sm"
                 >
                   {t('cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                  className="px-4 py-2 bg-gradient-to-r from-pink-400 to-rose-500 text-white rounded-xl hover:from-pink-500 hover:to-rose-600 shadow-md transition-all duration-300"
                 >
-                  {loading ? t('saving') : editingUser ? t('update') : t('create')}
+                  {loading ? t('saving') : t('update')}
                 </button>
               </div>
             </form>
