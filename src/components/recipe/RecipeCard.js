@@ -1,5 +1,3 @@
-// Enhanced RecipeCard.js component to better display ingredients matching
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaClock, FaStar, FaHeart, FaRegHeart, FaCheckCircle, FaSearch, FaBan } from 'react-icons/fa';
@@ -90,11 +88,6 @@ const RecipeCard = ({
   const similarityScoreFormatted = recipe.similarityScore !== undefined 
     ? `${Math.round(recipe.similarityScore * 100)}%` 
     : null;
-  
-  // Ensure nutrition properties are valid
-  const calories = recipe.nutrition?.calories?.value || 0;
-  const protein = recipe.nutrition?.protein?.value || 0;
-  const carbs = recipe.nutrition?.carbs?.value || 0;
   
   // Highlight matching ingredients if search ingredients provided
   const getHighlightedIngredients = () => {
@@ -239,23 +232,7 @@ const RecipeCard = ({
           {/* Display allergen information if applicable */}
           {getHighlightedAllergens()}
           
-          <div className="flex justify-between items-center mt-3">
-            {/* Nutrition Overview */}
-            <div className="flex space-x-3 text-xs">
-              <div className="flex flex-col items-center">
-                <span className="font-semibold">{Math.round(calories)}</span>
-                <span className="text-gray-500">{t('calories')}</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="font-semibold">{Math.round(protein)}g</span>
-                <span className="text-gray-500">{t('protein')}</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="font-semibold">{Math.round(carbs)}g</span>
-                <span className="text-gray-500">{t('carbs')}</span>
-              </div>
-            </div>
-            
+          <div className="flex justify-end items-center mt-3">
             {/* View Button */}
             <span className="text-primary text-sm font-medium">
               {t('View Recipe')} →

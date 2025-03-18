@@ -240,17 +240,11 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             {/* Top Rated Recipes */}
             <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-pink-100">
-              <div className="px-6 py-4 border-b border-pink-100 flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="bg-pink-100 p-2 rounded-full mr-2">
-                    <FaCrown className="text-pink-500" size={16} />
-                  </div>
-                  <h2 className="font-bold text-gray-800">{t('top_rated_recipes')}</h2>
+              <div className="px-6 py-4 border-b border-pink-100 flex items-center">
+                <div className="bg-pink-100 p-2 rounded-full mr-2">
+                  <FaCrown className="text-pink-500" size={16} />
                 </div>
-                <Link to="/admin/recipes" className="text-pink-500 text-sm font-medium hover:underline flex items-center">
-                  {t('view_all')}
-                  <FaChevronRight className="ml-1" size={12} />
-                </Link>
+                <h2 className="font-bold text-gray-800">{t('top_rated_recipes')}</h2>
               </div>
               
               <div className="divide-y divide-pink-100">
